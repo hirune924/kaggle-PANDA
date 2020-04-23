@@ -58,11 +58,11 @@ class PANDADataset(Dataset):
 
 
 
-class PLBasicSystem(pl.LightningModule):
+class PLBasicImageClassificationSystem(pl.LightningModule):
     
     def __init__(self, model, hparams):
     #def __init__(self, train_loader, val_loader, model):
-        super(PLBasicSystem, self).__init__()
+        super(PLBasicImageClassificationSystem, self).__init__()
         #self.train_loader = train_loader
         #self.val_loader = val_loader
         self.hparams = hparams
@@ -83,7 +83,7 @@ class PLBasicSystem(pl.LightningModule):
 
     def configure_optimizers(self):
         # REQUIRED
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.hparams.learning_rate)
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
         return [optimizer], [scheduler]
     
@@ -106,7 +106,7 @@ class PLBasicSystem(pl.LightningModule):
         train_df = pd.read_csv(os.path.join(self.hparams.data_dir,'train.csv'))
         train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
-        transform = A.Compose([A.Resize(height=128, width=128, interpolation=1, always_apply=False, p=1),
+        transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1),
                      A.Flip(always_apply=False, p=0.5),
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
@@ -116,12 +116,12 @@ class PLBasicSystem(pl.LightningModule):
         
     def train_dataloader(self):
         # REQUIRED
-        return DataLoader(self.train_dataset, batch_size=32,
+        return DataLoader(self.train_dataset, batch_size=self.hparams.batch_size,
                           shuffle=True, num_workers=4)
 
     def val_dataloader(self):
         # OPTIONAL
-        return DataLoader(self.val_dataset, batch_size=32,
+        return DataLoader(self.val_dataset, batch_size=self.hparams.batch_size,
                           shuffle=True, num_workers=4)
 
     #def test_dataloader(self):
@@ -148,37 +148,41 @@ def main(hparams):
         api_key="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0=",
         project_name="hirune924/kaggle-PANDA",
         close_after_fit=False,
+        upload_source_files=[],
+        params=vars(hparams)
         #experiment_name="default",  # Optional,
-        #params={"max_epochs": 10,
-        #        "batch_size": 32},  # Optional,
         #tags=["pytorch-lightning", "mlp"]  # Optional,
     )
+    tb_logger = loggers.TensorBoardLogger(save_dir=hparams.log_dir, name = 'default'、version = None)
 
     checkpoint_callback = ModelCheckpoint(
-        filepath=hparam.log_dir,
+        filepath=hparams.log_dir,
         save_top_k=10,
         verbose=True,
         monitor='avg_val_loss',
-        mode='min'
+        mode='min',
+        save_weights_only = False,
+        period = 1
     )
 
     # default used by the Trainer
     early_stop_callback = EarlyStopping(
-        monitor='val_loss',
+        monitor='avg_val_loss',
         patience=5,
+        min_delta = 0.0,
         strict=False,
         verbose=False,
         mode='min'
     )
 
     model = get_model_from_name(model_name='resnet18', num_classes=6, pretrained=True)
-    pl_model = PLBasicSystem(model, hparams)
+    pl_model = PLBasicImageClassificationSystem(model, hparams)
 
     trainer = Trainer(gpus=hparams.gpus, max_epochs=hparams.max_epochs,min_epochs=hparams.min_epochs,
                     max_steps=None,min_steps=None,
                     checkpoint_callback=checkpoint_callback,
                     early_stop_callback=early_stop_callback,
-                    logger=neptune_logger,
+                    logger=[tb_logger, neptune_logger],
                     accumulate_grad_batches=1,
                     precision=hparams.precision,
                     amp_level='O1',
@@ -212,6 +216,12 @@ if __name__ == '__main__':
                         type=int, required=False, default=10)
     parser.add_argument('-eval', '--check_val_every_n_epoch', help='check_val_every_n_epoch',
                         type=int, required=False, default=1)
+    parser.add_argument('-bs', '--batch_size', help='batch_size',
+                        type=int, required=False, default=32)
+    parser.add_argument('-is', '--image_size', help='image_size',
+                        type=int, required=False, default=256)
+    parser.add_argument('-lr', '--learning_rate', help='learning_rate',
+                        type=float, required=False, default=0.001)
     parser.add_argument('-ld', '--log_dir', help='path to log',
                         type=str, required=True)
     parser.add_argument('-dd', '--data_dir', help='path to data dir',
