@@ -161,7 +161,7 @@ def main(hparams):
         verbose=True,
         monitor='avg_val_loss',
         mode='min',
-        save_weights_only = False,
+        save_weights_only = True,
         period = 1
     )
 
