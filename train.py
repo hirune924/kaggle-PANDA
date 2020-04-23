@@ -24,8 +24,8 @@ import torchvision.models as models
 import torch.nn as nn
 
 # for visualization
-import matplotlib.pyplot as plt
-%matplotlib inline
+#import matplotlib.pyplot as plt
+#%matplotlib inline
 
 class PANDADataset(Dataset):
     """PANDA Dataset."""
@@ -43,7 +43,7 @@ class PANDADataset(Dataset):
         return len(self.data)
     
     def __getitem__(self, idx):
-        img_name = os.path.join('/kaggle/input/prostate-cancer-grade-assessment/train_images/', self.data.loc[idx, 'image_id'] + '.tiff')
+        img_name = os.path.join(os.path.join(hparams.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + '.tiff')
         data_provider = self.data.loc[idx, 'data_provider']
         gleason_score = self.data.loc[idx, 'gleason_score']
         isup_grade = label = self.data.loc[idx, 'isup_grade']
@@ -60,11 +60,12 @@ class PANDADataset(Dataset):
 
 class PLBasicSystem(pl.LightningModule):
     
-    def __init__(self, model):
+    def __init__(self, model, hparams):
     #def __init__(self, train_loader, val_loader, model):
         super(PLBasicSystem, self).__init__()
         #self.train_loader = train_loader
         #self.val_loader = val_loader
+        self.hparams = hparams
         self.model = model
         self.criteria = nn.CrossEntropyLoss()
 
@@ -102,7 +103,7 @@ class PLBasicSystem(pl.LightningModule):
 
 # For Data
     def prepare_data(self):
-        train_df = pd.read_csv('/kaggle/input/prostate-cancer-grade-assessment/train.csv')
+        train_df = pd.read_csv(os.path.join(self.hparams.data_dir,'train.csv'))
         train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
         transform = A.Compose([A.Resize(height=128, width=128, interpolation=1, always_apply=False, p=1),
@@ -154,8 +155,8 @@ def main(hparams):
     )
 
     checkpoint_callback = ModelCheckpoint(
-        filepath='../working',
-        save_top_k=1,
+        filepath=hparam.log_dir,
+        save_top_k=10,
         verbose=True,
         monitor='avg_val_loss',
         mode='min'
@@ -164,26 +165,27 @@ def main(hparams):
     # default used by the Trainer
     early_stop_callback = EarlyStopping(
         monitor='val_loss',
-        patience=3,
+        patience=5,
         strict=False,
         verbose=False,
         mode='min'
     )
 
     model = get_model_from_name(model_name='resnet18', num_classes=6, pretrained=True)
-    pl_model = PLBasicSystem(model)
+    pl_model = PLBasicSystem(model, hparams)
 
-    trainer = Trainer(gpus=hparams.gpus, max_epochs=5,min_epochs=1,max_steps=None,min_steps=None,
+    trainer = Trainer(gpus=hparams.gpus, max_epochs=hparams.max_epochs,min_epochs=hparams.min_epochs,
+                    max_steps=None,min_steps=None,
                     checkpoint_callback=checkpoint_callback,
                     early_stop_callback=early_stop_callback,
                     logger=neptune_logger,
                     accumulate_grad_batches=1,
-                    precision=32,
+                    precision=hparams.precision,
                     amp_level='O1',
                     auto_lr_find=True,
                     benchmark=True,
-                    check_val_every_n_epoch=1,
-                    distributed_backend='dp',
+                    check_val_every_n_epoch=hparams.check_val_every_n_epoch,
+                    distributed_backend='ddp',
                     num_nodes=1,
                     fast_dev_run=False,
                     gradient_clip_val=0.0,
@@ -195,12 +197,26 @@ def main(hparams):
     # fit model !
     trainer.fit(pl_model)
 
-    neptune_logger.experiment.log_artifact('../working')
+    neptune_logger.experiment.log_artifact(hparam.log_dir)
 
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('--gpus', default=None)
+    parser.add_argument('-ng', '--gpus', help='num GPU all=-1',
+                        type=int, required=False, default=-1)
+    parser.add_argument('-pr', '--precision', help='precision',
+                        type=int, required=False, default=32)
+    parser.add_argument('-emax', '--max_epochs', help='max_epochs',
+                        type=int, required=False, default=100)
+    parser.add_argument('-emin', '--min_epochs', help='min_epochs',
+                        type=int, required=False, default=10)
+    parser.add_argument('-eval', '--check_val_every_n_epoch', help='check_val_every_n_epoch',
+                        type=int, required=False, default=1)
+    parser.add_argument('-ld', '--log_dir', help='path to log',
+                        type=str, required=True)
+    parser.add_argument('-dd', '--data_dir', help='path to data dir',
+                        type=str, required=True)
+    
     args = parser.parse_args()
 
     main(args)
