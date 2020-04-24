@@ -154,7 +154,7 @@ def main(hparams):
         project_name="hirune924/kaggle-PANDA",
         close_after_fit=False,
         upload_source_files=['*.py','*.ipynb'],
-        params=vars(hparams)
+        params=None,#vars(hparams)
         #experiment_name="default",  # Optional,
         #tags=["pytorch-lightning", "mlp"]  # Optional,
     )
