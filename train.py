@@ -59,13 +59,12 @@ class PANDADataset(Dataset):
         data_provider = self.data.loc[idx, 'data_provider']
         gleason_score = self.data.loc[idx, 'gleason_score']
         isup_grade = label = self.data.loc[idx, 'isup_grade']
+        
         if self.image_format == 'tiff':
             image = skimage.io.MultiImage(img_name)[-1]
         elif self.image_format == 'png':
-            print(img_name)
             image = cv2.imread(img_name)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        #print(img_name)
         
         if self.transform:
             image = self.transform(image=image)
