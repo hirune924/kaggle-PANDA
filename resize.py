@@ -20,7 +20,7 @@ def main(args):
     
     for img_id in tqdm(train_labels.image_id):
         load_path = os.path.join(args.data_dir, 'train_images/' + img_id + '.tiff')
-        save_path = os.path.join(args.save_dir, 'train_images/' + img_id + '.tiff')
+        save_path = os.path.join(args.save_dir, 'train_images/' + img_id + '.png')
 
         biopsy = skimage.io.MultiImage(load_path)
         img = cv2.resize(biopsy[-1], (args.size, args.size))
