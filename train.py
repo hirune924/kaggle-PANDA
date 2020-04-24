@@ -36,7 +36,7 @@ import torch.nn as nn
 class PANDADataset(Dataset):
     """PANDA Dataset."""
     
-    def __init__(self, dataframe, data_dir, transform=None):
+    def __init__(self, dataframe, data_dir, image_format, transform=None):
         """
         Args:
             data_path (string): data path(glob_pattern) for dataset images
@@ -45,12 +45,13 @@ class PANDADataset(Dataset):
         self.data = dataframe.reset_index(drop=True) #pd.read_csv('/kaggle/input/prostate-cancer-grade-assessment/train.csv')
         self.transform = transform
         self.data_dir = data_dir
+        self.image_format = image_format
         
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, idx):
-        img_name = os.path.join(os.path.join(self.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + '.tiff')
+        img_name = os.path.join(os.path.join(self.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + self.image_format)
         data_provider = self.data.loc[idx, 'data_provider']
         gleason_score = self.data.loc[idx, 'gleason_score']
         isup_grade = label = self.data.loc[idx, 'isup_grade']
@@ -120,8 +121,8 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
         
-        self.train_dataset = PANDADataset(train_df, self.hparams.data_dir, transform=transform)
-        self.val_dataset = PANDADataset(val_df, self.hparams.data_dir, transform=transform)
+        self.train_dataset = PANDADataset(train_df, self.hparams.data_dir, self.hparams.image_format, transform=transform)
+        self.val_dataset = PANDADataset(val_df, self.hparams.data_dir, self.hparams.image_format, transform=transform)
         
     def train_dataloader(self):
         # REQUIRED
@@ -244,6 +245,8 @@ if __name__ == '__main__':
                         type=float, required=False, default=0.001)
     parser.add_argument('-db', '--distributed_backend', help='distributed_backend',
                         type=str, required=False, default='dp')
+    parser.add_argument('-dd', '--image_format', help='image_format',
+                        type=str, required=False, default='tiff')
     parser.add_argument('-ld', '--log_dir', help='path to log',
                         type=str, required=True)
     parser.add_argument('-dd', '--data_dir', help='path to data dir',
