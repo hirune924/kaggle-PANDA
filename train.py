@@ -13,6 +13,7 @@ import numpy as np
 
 import pandas as pd
 import skimage.io
+import cv2
 import albumentations as A
 
 from sklearn.metrics import accuracy_score
