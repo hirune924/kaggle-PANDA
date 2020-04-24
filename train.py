@@ -245,7 +245,7 @@ if __name__ == '__main__':
                         type=float, required=False, default=0.001)
     parser.add_argument('-db', '--distributed_backend', help='distributed_backend',
                         type=str, required=False, default='dp')
-    parser.add_argument('-dd', '--image_format', help='image_format',
+    parser.add_argument('-if', '--image_format', help='image_format',
                         type=str, required=False, default='tiff')
     parser.add_argument('-ld', '--log_dir', help='path to log',
                         type=str, required=True)
