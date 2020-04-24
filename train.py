@@ -153,7 +153,7 @@ def main(hparams):
         api_key="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0=",
         project_name="hirune924/kaggle-PANDA",
         close_after_fit=False,
-        upload_source_files=['/*.py','/*.ipynb'],
+        upload_source_files=['*.py','*.ipynb'],
         params=vars(hparams)
         #experiment_name="default",  # Optional,
         #tags=["pytorch-lightning", "mlp"]  # Optional,
@@ -194,7 +194,7 @@ def main(hparams):
                     auto_lr_find=True,
                     benchmark=True,
                     check_val_every_n_epoch=hparams.check_val_every_n_epoch,
-                    distributed_backend='dp',
+                    distributed_backend=hparams.distributed_backend,
                     num_nodes=1,
                     fast_dev_run=False,
                     gradient_clip_val=0.0,
@@ -227,6 +227,8 @@ if __name__ == '__main__':
                         type=int, required=False, default=256)
     parser.add_argument('-lr', '--learning_rate', help='learning_rate',
                         type=float, required=False, default=0.001)
+    parser.add_argument('-db', '--distributed_backend', help='distributed_backend',
+                        type=str, required=False, default='dp')
     parser.add_argument('-ld', '--log_dir', help='path to log',
                         type=str, required=True)
     parser.add_argument('-dd', '--data_dir', help='path to data dir',
