@@ -115,7 +115,7 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         train_df = pd.read_csv(os.path.join(self.hparams.data_dir,'train.csv'))
         train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
-        transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1),
+        transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
                      A.Flip(always_apply=False, p=0.5),
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
