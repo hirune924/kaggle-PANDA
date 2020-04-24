@@ -1,5 +1,7 @@
 FROM pytorch/pytorch:1.5-cuda10.1-cudnn7-runtime
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 MAINTAINER "@hirune924"
 
 RUN apt-get update --fix-missing && apt-get install -y git libopencv-dev\
