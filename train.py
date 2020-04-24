@@ -58,8 +58,11 @@ class PANDADataset(Dataset):
         data_provider = self.data.loc[idx, 'data_provider']
         gleason_score = self.data.loc[idx, 'gleason_score']
         isup_grade = label = self.data.loc[idx, 'isup_grade']
-        
-        image = skimage.io.MultiImage(img_name)[-1]
+        if self.image_format == 'tiff':
+            image = skimage.io.MultiImage(img_name)[-1]
+        elif self.image_format == 'png':
+            image = cv2.imread(img_name)
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         #print(img_name)
         
         if self.transform:
@@ -171,10 +174,6 @@ def get_model_from_name(model_name=None, image_size=None, num_classes=None, pret
         model = None
 
     return model
-
-
-def quadratic_weighted_kappa(y_hat, y):
-    return metrics.cohen_kappa_score(y_hat, y, weights='quadratic')
 
 
 def main(hparams):
