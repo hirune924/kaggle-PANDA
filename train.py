@@ -197,7 +197,7 @@ def main(hparams):
                     max_steps=None,min_steps=None,
                     checkpoint_callback=checkpoint_callback,
                     early_stop_callback=early_stop_callback,
-                    logger=tb_logger,#[tb_logger, neptune_logger],
+                    logger=comet_logger,#[tb_logger, neptune_logger],
                     accumulate_grad_batches=1,
                     precision=hparams.precision,
                     amp_level='O1',
