@@ -25,6 +25,9 @@ from pytorch_lightning.logging.neptune import NeptuneLogger
 #from pytorch_lightning.logging import CometLogger
 from pytorch_lightning import loggers
 
+import sklearn.metrics as metrics
+
+
 import torchvision.models as models
 import torch.nn as nn
 
@@ -87,12 +90,20 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         y_hat = self.forward(x)
         loss = self.criteria(y_hat, y)
         loss = loss.unsqueeze(dim=-1)
-        return {'loss': loss}
+        log = {'train_loss': loss}
+        return {'loss': loss, 'log': log}
+
+    def training_epoch_end(self, outputs):
+        # OPTIONAL
+        avg_loss = torch.stack([x['loss'] for x in outputs]).mean()
+        log = {'avg_train_loss': avg_loss}
+        return {'avg_train_loss': avg_loss, 'log': log}
 
     def configure_optimizers(self):
         # REQUIRED
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.hparams.learning_rate)
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
+        #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=2, verbose=True, eps=1e-6)
         return [optimizer], [scheduler]
     
 # For Validation
@@ -102,13 +113,23 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         y_hat = self.forward(x)
         val_loss = self.criteria(y_hat, y)
         val_loss = val_loss.unsqueeze(dim=-1)
-        log = {'val_loss': val_loss}
-        return {'val_loss': val_loss}
+
+        preds = torch.argmax(y_hat, dim=1)
+
+        return {'val_loss': val_loss, 'y': y, 'preds': preds, 'y_hat': y_hat}
 
     def validation_epoch_end(self, outputs):
         # OPTIONAL
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        log = {'avg_val_loss': avg_loss}
+
+        y = torch.cat([x['y'] for x in outputs])
+        preds = torch.cat([x['preds'] for x in outputs])
+
+        val_acc = metrics.accuracy_score(y, preds, **self.params)
+        val_qwk = metrics.cohen_kappa_score(y_hat, y, weights='quadratic')
+
+
+        log = {'avg_val_loss': avg_loss, 'val_acc': val_acc, 'val_qwk': val_qwk}
         return {'avg_val_loss': avg_loss, 'log': log}
 
 # For Data
@@ -151,6 +172,9 @@ def get_model_from_name(model_name=None, image_size=None, num_classes=None, pret
 
     return model
 
+
+def quadratic_weighted_kappa(y_hat, y):
+    return metrics.cohen_kappa_score(y_hat, y, weights='quadratic')
 
 
 def main(hparams):
@@ -242,7 +266,7 @@ if __name__ == '__main__':
     parser.add_argument('-is', '--image_size', help='image_size',
                         type=int, required=False, default=256)
     parser.add_argument('-lr', '--learning_rate', help='learning_rate',
-                        type=float, required=False, default=0.001)
+                        type=float, required=False, default=1e-4)
     parser.add_argument('-db', '--distributed_backend', help='distributed_backend',
                         type=str, required=False, default='dp')
     parser.add_argument('-if', '--image_format', help='image_format',
