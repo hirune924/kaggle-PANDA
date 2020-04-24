@@ -125,7 +125,7 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         y = torch.cat([x['y'] for x in outputs])
         preds = torch.cat([x['preds'] for x in outputs])
 
-        val_acc = metrics.accuracy_score(y, preds, **self.params)
+        val_acc = metrics.accuracy_score(y, preds)
         val_qwk = metrics.cohen_kappa_score(y_hat, y, weights='quadratic')
 
 
