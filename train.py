@@ -22,7 +22,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.logging.neptune import NeptuneLogger
-from pytorch_lightning.logging import CometLogger
+#from pytorch_lightning.logging import CometLogger
 from pytorch_lightning import loggers
 
 import torchvision.models as models
@@ -160,6 +160,7 @@ def main(hparams):
         #experiment_name="default",  # Optional,
         #tags=["pytorch-lightning", "mlp"]  # Optional,
     )
+    '''
     comet_logger = CometLogger(
         api_key="QCxbRVX2qhQj1t0ajIZl2nk2c",
         workspace='hirune924',  # Optional
@@ -167,8 +168,10 @@ def main(hparams):
         project_name="kaggle-panda",  # Optional
         #rest_api_key=os.environ.get('COMET_REST_API_KEY'),  # Optional
         #experiment_name='default'  # Optional
-    )
+    )'''
     tb_logger = loggers.TensorBoardLogger(save_dir=hparams.log_dir, name='default', version=None)
+ 
+    logger_list = [tb_logger, neptune_logger] if hparams.distributed_backend!='ddp' else tb_logger
 
     checkpoint_callback = ModelCheckpoint(
         filepath=hparams.log_dir,
@@ -197,7 +200,7 @@ def main(hparams):
                     max_steps=None,min_steps=None,
                     checkpoint_callback=checkpoint_callback,
                     early_stop_callback=early_stop_callback,
-                    logger=comet_logger,#[tb_logger, neptune_logger],
+                    logger=logger_list,
                     accumulate_grad_batches=1,
                     precision=hparams.precision,
                     amp_level='O1',
