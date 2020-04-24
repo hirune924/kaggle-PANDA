@@ -114,17 +114,17 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         val_loss = self.criteria(y_hat, y)
         val_loss = val_loss.unsqueeze(dim=-1)
 
-        preds = torch.argmax(y_hat, dim=1)
-
-        return {'val_loss': val_loss, 'y': y, 'preds': preds, 'y_hat': y_hat}
+        return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat}
 
     def validation_epoch_end(self, outputs):
         # OPTIONAL
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
 
-        y = torch.cat([x['y'] for x in outputs])
-        preds = torch.cat([x['preds'] for x in outputs])
+        
+        y = torch.cat([x['y'] for x in outputs]).cpu().detach().numpy().copy()
+        y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()
 
+        preds = np.argmax(y_hat, axis=1)
         val_acc = metrics.accuracy_score(y, preds)
         val_qwk = metrics.cohen_kappa_score(y_hat, y, weights='quadratic')
 
