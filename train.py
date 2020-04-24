@@ -101,12 +101,14 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         y_hat = self.forward(x)
         val_loss = self.criteria(y_hat, y)
         val_loss = val_loss.unsqueeze(dim=-1)
+        log = {'val_loss': val_loss}
         return {'val_loss': val_loss}
 
     def validation_epoch_end(self, outputs):
         # OPTIONAL
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        return {'avg_val_loss': avg_loss}
+        log = {'avg_val_loss': avg_loss}
+        return {'avg_val_loss': avg_loss, 'log': log}
 
 # For Data
     def prepare_data(self):
