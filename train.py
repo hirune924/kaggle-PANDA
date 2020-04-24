@@ -22,12 +22,12 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.logging.neptune import NeptuneLogger
+from pytorch_lightning.logging import CometLogger
 from pytorch_lightning import loggers
 
 import torchvision.models as models
 import torch.nn as nn
 
-import neptune
 
 # for visualization
 #import matplotlib.pyplot as plt
@@ -75,8 +75,6 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         self.hparams = hparams
         self.model = model
         self.criteria = nn.CrossEntropyLoss()
-        neptune.init(api_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0=",
-        project_qualified_name="hirune924/kaggle-PANDA")
 
     def forward(self, x):
         return self.model(x)
@@ -162,6 +160,14 @@ def main(hparams):
         #experiment_name="default",  # Optional,
         #tags=["pytorch-lightning", "mlp"]  # Optional,
     )
+    comet_logger = CometLogger(
+        api_key="QCxbRVX2qhQj1t0ajIZl2nk2c",
+        workspace='hirune924',  # Optional
+        save_dir='.',  # Optional
+        project_name="kaggle-panda",  # Optional
+        #rest_api_key=os.environ.get('COMET_REST_API_KEY'),  # Optional
+        #experiment_name='default'  # Optional
+    )
     tb_logger = loggers.TensorBoardLogger(save_dir=hparams.log_dir, name='default', version=None)
 
     checkpoint_callback = ModelCheckpoint(
@@ -191,7 +197,7 @@ def main(hparams):
                     max_steps=None,min_steps=None,
                     checkpoint_callback=checkpoint_callback,
                     early_stop_callback=early_stop_callback,
-                    logger=[tb_logger, neptune_logger],
+                    logger=comet_logger,#[tb_logger, neptune_logger],
                     accumulate_grad_batches=1,
                     precision=hparams.precision,
                     amp_level='O1',
