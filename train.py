@@ -51,7 +51,7 @@ class PANDADataset(Dataset):
         return len(self.data)
     
     def __getitem__(self, idx):
-        img_name = os.path.join(os.path.join(self.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + self.image_format)
+        img_name = os.path.join(os.path.join(self.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + '.' +self.image_format)
         data_provider = self.data.loc[idx, 'data_provider']
         gleason_score = self.data.loc[idx, 'gleason_score']
         isup_grade = label = self.data.loc[idx, 'isup_grade']
