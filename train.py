@@ -1,3 +1,6 @@
+#!pip install pytorch-lightning
+#!pip install neptune-client
+
 from argparse import ArgumentParser
 # for dataset and dataloader
 import torch
@@ -19,6 +22,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.logging.neptune import NeptuneLogger
+from pytorch_lightning import loggers
 
 import torchvision.models as models
 import torch.nn as nn
@@ -30,7 +34,7 @@ import torch.nn as nn
 class PANDADataset(Dataset):
     """PANDA Dataset."""
     
-    def __init__(self, dataframe, transform=None):
+    def __init__(self, dataframe, data_dir, transform=None):
         """
         Args:
             data_path (string): data path(glob_pattern) for dataset images
@@ -38,12 +42,13 @@ class PANDADataset(Dataset):
         """
         self.data = dataframe.reset_index(drop=True) #pd.read_csv('/kaggle/input/prostate-cancer-grade-assessment/train.csv')
         self.transform = transform
+        self.data_dir = data_dir
         
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, idx):
-        img_name = os.path.join(os.path.join(hparams.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + '.tiff')
+        img_name = os.path.join(os.path.join(self.data_dir, 'train_images/'), self.data.loc[idx, 'image_id'] + '.tiff')
         data_provider = self.data.loc[idx, 'data_provider']
         gleason_score = self.data.loc[idx, 'gleason_score']
         isup_grade = label = self.data.loc[idx, 'isup_grade']
@@ -111,8 +116,8 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
         
-        self.train_dataset = PANDADataset(train_df, transform=transform)
-        self.val_dataset = PANDADataset(val_df, transform=transform)
+        self.train_dataset = PANDADataset(train_df, self.hparams.data_dir, transform=transform)
+        self.val_dataset = PANDADataset(val_df, self.hparams.data_dir, transform=transform)
         
     def train_dataloader(self):
         # REQUIRED
@@ -148,12 +153,12 @@ def main(hparams):
         api_key="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0=",
         project_name="hirune924/kaggle-PANDA",
         close_after_fit=False,
-        upload_source_files=[],
+        upload_source_files=['/*.py','/*.ipynb'],
         params=vars(hparams)
         #experiment_name="default",  # Optional,
         #tags=["pytorch-lightning", "mlp"]  # Optional,
     )
-    tb_logger = loggers.TensorBoardLogger(save_dir=hparams.log_dir, name = 'default'、version = None)
+    tb_logger = loggers.TensorBoardLogger(save_dir=hparams.log_dir, name='default', version=None)
 
     checkpoint_callback = ModelCheckpoint(
         filepath=hparams.log_dir,
@@ -189,7 +194,7 @@ def main(hparams):
                     auto_lr_find=True,
                     benchmark=True,
                     check_val_every_n_epoch=hparams.check_val_every_n_epoch,
-                    distributed_backend='ddp',
+                    distributed_backend='dp',
                     num_nodes=1,
                     fast_dev_run=False,
                     gradient_clip_val=0.0,
@@ -201,7 +206,7 @@ def main(hparams):
     # fit model !
     trainer.fit(pl_model)
 
-    neptune_logger.experiment.log_artifact(hparam.log_dir)
+    neptune_logger.experiment.log_artifact(hparams.log_dir)
 
 
 if __name__ == '__main__':
@@ -227,6 +232,7 @@ if __name__ == '__main__':
     parser.add_argument('-dd', '--data_dir', help='path to data dir',
                         type=str, required=True)
     
+    #args = parser.parse_args(['-ld', '../working/', '-dd','../input/prostate-cancer-grade-assessment/'])
     args = parser.parse_args()
 
     main(args)
