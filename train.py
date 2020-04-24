@@ -104,7 +104,7 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.hparams.learning_rate)
         #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=2, verbose=True, eps=1e-6)
-        return [optimizer], [scheduler]
+        return [optimizer], ['scheduler': scheduler, 'monitor': 'avg_val_loss']
     
 # For Validation
     def validation_step(self, batch, batch_nb):
