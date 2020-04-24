@@ -27,6 +27,8 @@ from pytorch_lightning import loggers
 import torchvision.models as models
 import torch.nn as nn
 
+import neptune
+
 # for visualization
 #import matplotlib.pyplot as plt
 #%matplotlib inline
@@ -73,6 +75,8 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         self.hparams = hparams
         self.model = model
         self.criteria = nn.CrossEntropyLoss()
+        neptune.init(apt_token="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0=",
+        project_qualified_name="hirune924/kaggle-PANDA")
 
     def forward(self, x):
         return self.model(x)
@@ -154,7 +158,7 @@ def main(hparams):
         project_name="hirune924/kaggle-PANDA",
         close_after_fit=False,
         upload_source_files=['*.py','*.ipynb'],
-        params=None,#vars(hparams)
+        params=vars(hparams)
         #experiment_name="default",  # Optional,
         #tags=["pytorch-lightning", "mlp"]  # Optional,
     )
