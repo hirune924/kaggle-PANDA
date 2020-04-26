@@ -249,7 +249,7 @@ def main(hparams):
     # default used by the Trainer
     early_stop_callback = EarlyStopping(
         monitor='avg_val_loss',
-        patience=5,
+        patience=10,
         min_delta = 0.0,
         strict=False,
         verbose=False,
