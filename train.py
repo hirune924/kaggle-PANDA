@@ -71,18 +71,26 @@ class PANDADataset(Dataset):
             image = torch.from_numpy(image['image'].transpose(2, 0, 1))
         return image, isup_grade
 
+class RMSELoss(torch.nn.Module):
+    def __init__(self):
+        super(RMSELoss,self).__init__()
+
+    def forward(self,x,y):
+        criterion = nn.MSELoss()
+        loss = torch.sqrt(criterion(x, y))
+        return loss
 
 
-class PLBasicImageClassificationSystem(pl.LightningModule):
+class PLRegressionImageClassificationSystem(pl.LightningModule):
     
     def __init__(self, model, hparams):
     #def __init__(self, train_loader, val_loader, model):
-        super(PLBasicImageClassificationSystem, self).__init__()
+        super(PLRegressionImageClassificationSystem, self).__init__()
         #self.train_loader = train_loader
         #self.val_loader = val_loader
         self.hparams = hparams
         self.model = model
-        self.criteria = nn.CrossEntropyLoss()
+        self.criteria = RMSELoss()
 
     def forward(self, x):
         return self.model(x)
@@ -92,7 +100,7 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         # REQUIRED
         x, y = batch
         y_hat = self.forward(x)
-        loss = self.criteria(y_hat, y)
+        loss = self.criteria(y_hat, y.view(-1, 1).float())
         loss = loss.unsqueeze(dim=-1)
         log = {'train_loss': loss}
         return {'loss': loss, 'log': log}
@@ -109,13 +117,21 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=2, verbose=True, eps=1e-6)
         return [optimizer], [{'scheduler': scheduler, 'monitor': 'avg_val_loss'}]
+
+    def optimizer_step(self, current_epoch, batch_idx, optimizer, optimizer_idx,
+                    second_order_closure=None):
+        optimizer.step()
+        optimizer.zero_grad()
+        for param_group in optimizer.param_groups:
+            lr = param_group["lr"]
+        self.logger.experiment[1].log_metric("learning_rate", lr)
     
 # For Validation
     def validation_step(self, batch, batch_nb):
         # OPTIONAL
         x, y = batch
         y_hat = self.forward(x)
-        val_loss = self.criteria(y_hat, y)
+        val_loss = self.criteria(y_hat, y.view(-1, 1).float())
         val_loss = val_loss.unsqueeze(dim=-1)
 
         return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat}
@@ -128,7 +144,8 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
         y = torch.cat([x['y'] for x in outputs]).cpu().detach().numpy().copy()
         y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()
 
-        preds = np.argmax(y_hat, axis=1)
+        #preds = np.argmax(y_hat, axis=1)
+        preds = preds_rounder(y_hat)
         val_acc = metrics.accuracy_score(y, preds)
         val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
 
@@ -163,6 +180,25 @@ class PLBasicImageClassificationSystem(pl.LightningModule):
     #    # OPTIONAL
     #    pass
 
+def preds_rounder(test_preds):
+    coef = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
+
+    for i, pred in enumerate(test_preds):
+        if pred < coef[0]:
+            test_preds[i] = 0
+        elif pred >= coef[0] and pred < coef[1]:
+            test_preds[i] = 1
+        elif pred >= coef[1] and pred < coef[2]:
+            test_preds[i] = 2
+        elif pred >= coef[2] and pred < coef[3]:
+            test_preds[i] = 3
+        elif pred >= coef[3] and pred < coef[4]:
+            test_preds[i] = 4
+        elif pred >= coef[4] and pred < coef[5]:
+            test_preds[i] = 5
+        else:
+            test_preds[i] = 6
+    return test_preds
 
 def get_model_from_name(model_name=None, image_size=None, num_classes=None, pretrained=True):
     
@@ -220,8 +256,8 @@ def main(hparams):
         mode='min'
     )
 
-    model = get_model_from_name(model_name='resnet18', num_classes=6, pretrained=True)
-    pl_model = PLBasicImageClassificationSystem(model, hparams)
+    model = get_model_from_name(model_name='resnet18', num_classes=1, pretrained=True)
+    pl_model = PLRegressionImageClassificationSystem(model, hparams)
 
     trainer = Trainer(gpus=hparams.gpus, max_epochs=hparams.max_epochs,min_epochs=hparams.min_epochs,
                     max_steps=None,min_steps=None,
