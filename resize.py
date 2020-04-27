@@ -24,6 +24,7 @@ def main(args):
 
         biopsy = skimage.io.MultiImage(load_path)
         img = cv2.resize(biopsy[-1], (args.size, args.size))
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, img)
 
     os.makedirs(os.path.join(args.save_dir, 'train_label_masks'), exist_ok=True)
