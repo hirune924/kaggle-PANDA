@@ -18,6 +18,7 @@ import albumentations as A
 
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -124,7 +125,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         optimizer.zero_grad()
         for param_group in optimizer.param_groups:
             lr = param_group["lr"]
-        self.logger.experiment[1].log_metric("learning_rate", lr)
+        self.logger.log_metrics({"learning_rate": lr})
     
 # For Validation
     def validation_step(self, batch, batch_nb):
@@ -155,8 +156,15 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 
 # For Data
     def prepare_data(self):
-        train_df = pd.read_csv(os.path.join(self.hparams.data_dir,'train.csv'))
-        train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
+        df = pd.read_csv(os.path.join(self.hparams.data_dir,'train.csv'))
+        skf = KFold(n_splits=5, shuffle = True, random_state = 2020)
+        for fold, (train_index, val_index) in enumerate(skf.split(df.values, df['isup_grade'])):
+            df.loc[val_index, 'fold'] = int(fold)
+        df['fold'] = df['fold'].astype(int)
+        #print(df)
+        train_df = df[df['fold']!=self.hparams.fold]
+        val_df = df[df['fold']==self.hparams.fold]
+        #train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
         transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
                      A.Flip(always_apply=False, p=0.5),
@@ -174,7 +182,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
     def val_dataloader(self):
         # OPTIONAL
         return DataLoader(self.val_dataset, batch_size=self.hparams.batch_size,
-                          shuffle=True, num_workers=4)
+                          shuffle=False, num_workers=4)
 
     #def test_dataloader(self):
     #    # OPTIONAL
@@ -235,9 +243,10 @@ def main(hparams):
     tb_logger = loggers.TensorBoardLogger(save_dir=hparams.log_dir, name='default', version=None)
  
     logger_list = [tb_logger, neptune_logger] if hparams.distributed_backend!='ddp' else tb_logger
+    print(logger_list)
 
     checkpoint_callback = ModelCheckpoint(
-        filepath=hparams.log_dir,
+        filepath=os.path.join(hparams.log_dir, '{epoch}-{avg_val_loss}-{val_qwk}'),
         save_top_k=10,
         verbose=True,
         monitor='avg_val_loss',
@@ -259,6 +268,15 @@ def main(hparams):
     model = get_model_from_name(model_name='resnet18', num_classes=1, pretrained=True)
     pl_model = PLRegressionImageClassificationSystem(model, hparams)
 
+###
+    if hparams.auto_lr_find:
+        trainer = Trainer()
+        lr_finder = trainer.lr_find(pl_model)
+        print(lr_finder.results)
+        print(lr_finder.suggestion())
+        pl_model.learning_rate = lr_finder.suggestion()
+###
+
     trainer = Trainer(gpus=hparams.gpus, max_epochs=hparams.max_epochs,min_epochs=hparams.min_epochs,
                     max_steps=None,min_steps=None,
                     checkpoint_callback=checkpoint_callback,
@@ -267,7 +285,7 @@ def main(hparams):
                     accumulate_grad_batches=1,
                     precision=hparams.precision,
                     amp_level='O1',
-                    auto_lr_find=True,
+                    auto_lr_find=False,
                     benchmark=True,
                     check_val_every_n_epoch=hparams.check_val_every_n_epoch,
                     distributed_backend=hparams.distributed_backend,
@@ -303,6 +321,12 @@ if __name__ == '__main__':
                         type=int, required=False, default=256)
     parser.add_argument('-lr', '--learning_rate', help='learning_rate',
                         type=float, required=False, default=1e-4)
+    parser.add_argument('-nf', '--num_fold', help='fold num',
+                        type=int, required=False, default=5)
+    parser.add_argument('-f', '--fold', help='target fold',
+                        type=int, required=False, default=0)
+    parser.add_argument('-alf', '--auto_lr_find', help='auto lr find.', 
+                        action='store_true')
     parser.add_argument('-db', '--distributed_backend', help='distributed_backend',
                         type=str, required=False, default='dp')
     parser.add_argument('-if', '--image_format', help='image_format',
