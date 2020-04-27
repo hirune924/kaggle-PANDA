@@ -257,7 +257,6 @@ def main(hparams):
     tb_logger = loggers.TensorBoardLogger(save_dir=hparams.log_dir, name='default', version=None)
  
     logger_list = [tb_logger, neptune_logger] if hparams.distributed_backend!='ddp' else tb_logger
-    print(logger_list)
 
     checkpoint_callback = ModelCheckpoint(
         filepath=os.path.join(hparams.log_dir, '{epoch}-{avg_val_loss}-{val_qwk}'),
