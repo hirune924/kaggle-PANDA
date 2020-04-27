@@ -31,6 +31,7 @@ import sklearn.metrics as metrics
 
 
 import torchvision.models as models
+import pretrainedmodels
 import torch.nn as nn
 
 
@@ -166,13 +167,22 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         val_df = df[df['fold']==self.hparams.fold]
         #train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
-        transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
+        train_transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
                      A.Flip(always_apply=False, p=0.5),
+                     A.RandomResizedCrop(height=self.hparams.image_size, width=self.hparams.image_size, scale=(0.8, 1.0), ratio=(0.75, 1.3333333333333333), interpolation=1, always_apply=False, p=1.0),
+                     A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, always_apply=False, p=0.5),
+                     A.GaussNoise(var_limit=(10.0, 50.0), mean=0, always_apply=False, p=0.5),
+                     #A.Rotate(limit=90, interpolation=1, border_mode=4, value=None, mask_value=None, always_apply=False, p=0.5),
+                     A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.1, rotate_limit=45, interpolation=1, border_mode=4, value=None, mask_value=None, always_apply=False, p=0.5),
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
-        
-        self.train_dataset = PANDADataset(train_df, self.hparams.data_dir, self.hparams.image_format, transform=transform)
-        self.val_dataset = PANDADataset(val_df, self.hparams.data_dir, self.hparams.image_format, transform=transform)
+
+        valid_transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
+                     A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
+                      ])
+
+        self.train_dataset = PANDADataset(train_df, self.hparams.data_dir, self.hparams.image_format, transform=train_transform)
+        self.val_dataset = PANDADataset(val_df, self.hparams.data_dir, self.hparams.image_format, transform=valid_transform)
         
     def train_dataloader(self):
         # REQUIRED
@@ -214,6 +224,10 @@ def get_model_from_name(model_name=None, image_size=None, num_classes=None, pret
         model = models.resnet18(pretrained=pretrained)
         in_features = model.fc.in_features
         model.fc = nn.Linear(in_features, num_classes)
+    elif model_name == 'se_resnet50':
+        model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
+        in_features = model.last_linear.in_features
+        model.last_linear = nn.Linear(in_features, num_classes)
     else:
         print('{} is not implimented'.format(model_name))
         model = None
@@ -227,8 +241,8 @@ def main(hparams):
         project_name="hirune924/kaggle-PANDA",
         close_after_fit=False,
         upload_source_files=['*.py','*.ipynb'],
-        params=vars(hparams)
-        #experiment_name="default",  # Optional,
+        params=vars(hparams),
+        experiment_name="default",  # Optional,
         #tags=["pytorch-lightning", "mlp"]  # Optional,
     )
     '''
@@ -258,14 +272,14 @@ def main(hparams):
     # default used by the Trainer
     early_stop_callback = EarlyStopping(
         monitor='avg_val_loss',
-        patience=10,
+        patience=20,
         min_delta = 0.0,
-        strict=False,
-        verbose=False,
+        strict=True,
+        verbose=True,
         mode='min'
     )
 
-    model = get_model_from_name(model_name='resnet18', num_classes=1, pretrained=True)
+    model = get_model_from_name(model_name=hparams.model_name, num_classes=1, pretrained=True)
     pl_model = PLRegressionImageClassificationSystem(model, hparams)
 
 ###
@@ -331,6 +345,8 @@ if __name__ == '__main__':
                         type=str, required=False, default='dp')
     parser.add_argument('-if', '--image_format', help='image_format',
                         type=str, required=False, default='tiff')
+    parser.add_argument('-mn', '--model_name', help='model_name',
+                        type=str, required=False, default='resnet18')
     parser.add_argument('-ld', '--log_dir', help='path to log',
                         type=str, required=True)
     parser.add_argument('-dd', '--data_dir', help='path to data dir',

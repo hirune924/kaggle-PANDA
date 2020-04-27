@@ -1,6 +1,10 @@
 # kaggle-PANDA
 
 
+'''
+python train.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50
+'''
+
 * モデル足す
 * DataAugmentation足す
 
