@@ -12,5 +12,5 @@ RUN apt-get update --fix-missing && apt-get install -y git libopencv-dev\
     
 RUN pip install pandas scikit-image albumentations opencv-python \
                 scikit-learn pytorch-lightning neptune-client imagecodecs tifffile \
-                pretrainedmodels 
+                pretrainedmodels catalyst[all] segmentation-models-pytorch
                 

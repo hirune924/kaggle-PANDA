@@ -2,8 +2,8 @@
 
 
 '''
-python train.py -dd=../data -ld=../log/ -if=png -mn=resnet18 -en=localdebug
-python train.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50
+python train_cls.py -dd=../data -ld=../log/ -if=png -mn=resnet18 -en=localdebug
+python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50
 '''
 
 ## primary task
