@@ -2,15 +2,17 @@
 
 
 '''
+python train_seg.py -dd=../data -ld=../log/ -if=png -mn=resnet18_unet
 python train_cls.py -dd=../data -ld=../log/ -if=png -mn=resnet18 -en=localdebug
 python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50
 '''
 
 ## primary task
-* 5Foldサブミット(256はした,512もした)
+* 5Foldサブミット(256はした,512もした,768する)
 * 画像サイズが大きい方が精度良さそう（CVは確かに上がる、LBも512にして劇的改善したから768にしてどうなるか確認）
-* そろそろファイル分ける
+* ファイル分けたからフォルダ整理する
 * segmentation→classification
+* ckptにfold番号を入れる
 
 ## secondary task
 * 足したいモデル（efficientNet、DenseNet）

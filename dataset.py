@@ -78,8 +78,6 @@ class PANDASegDataset(Dataset):
             mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
         mask = mask[:,:,0]
         
-        print(image.shape)
-        print(mask.shape)
         if self.transform:
             trns = self.transform(image=image, mask=mask)
             image = trns['image']
@@ -87,8 +85,6 @@ class PANDASegDataset(Dataset):
             image = torch.from_numpy(image.transpose(2, 0, 1))
             mask = torch.from_numpy(mask).unsqueeze(dim=0).float()
         
-        print(image.shape)
-        print(mask.shape)
         if data_provider=='karolinska':
             image = torch.cat([image, torch.ones_like(mask), torch.zeros_like(mask)], dim=0)
             mask = torch.cat([mask, torch.zeros_like(mask)], dim=0)

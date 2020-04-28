@@ -25,7 +25,7 @@ class PLImageSegmentationSystem(pl.LightningModule):
         #self.val_loader = val_loader
         self.hparams = hparams
         self.model = model
-        self.criteria = RMSELoss()
+        self.criteria = nn.MSELoss(reduction='sum')
 
     def forward(self, x):
         return self.model(x)
@@ -35,7 +35,7 @@ class PLImageSegmentationSystem(pl.LightningModule):
         # REQUIRED
         x, y = batch
         y_hat = self.forward(x)
-        loss = self.criteria(y_hat, y.view(-1, 1).float())
+        loss = self.criteria(y_hat, y)
         loss = loss.unsqueeze(dim=-1)
         log = {'train_loss': loss}
         return {'loss': loss, 'log': log}
@@ -66,26 +66,29 @@ class PLImageSegmentationSystem(pl.LightningModule):
         # OPTIONAL
         x, y = batch
         y_hat = self.forward(x)
-        val_loss = self.criteria(y_hat, y.view(-1, 1).float())
+        #val_loss = self.criteria(y_hat, y.view(-1, 1).float())
+        val_loss = self.criteria(y_hat, y)
         val_loss = val_loss.unsqueeze(dim=-1)
 
-        return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat}
+        #return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat}
+        return {'val_loss': val_loss}
 
     def validation_epoch_end(self, outputs):
         # OPTIONAL
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
 
         
-        y = torch.cat([x['y'] for x in outputs]).cpu().detach().numpy().copy()
-        y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()
+        #y = torch.cat([x['y'] for x in outputs]).cpu().detach().numpy().copy()
+        #y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()
 
         #preds = np.argmax(y_hat, axis=1)
-        preds = preds_rounder(y_hat)
-        val_acc = metrics.accuracy_score(y, preds)
-        val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
+        #preds = preds_rounder(y_hat)
+        #val_acc = metrics.accuracy_score(y, preds)
+        #val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
 
 
-        log = {'avg_val_loss': avg_loss, 'val_acc': val_acc, 'val_qwk': val_qwk}
+        #log = {'avg_val_loss': avg_loss, 'val_acc': val_acc, 'val_qwk': val_qwk}
+        log = {'avg_val_loss': avg_loss}
         return {'avg_val_loss': avg_loss, 'log': log}
 
 # For Data
@@ -97,7 +100,8 @@ class PLImageSegmentationSystem(pl.LightningModule):
             image_id = df.loc[idx, 'image_id']
             if not os.path.exists(os.path.join(os.path.join(self.hparams.data_dir, 'train_label_masks/'), image_id + '_mask.' + self.hparams.image_format)):
                 df = df.drop(idx, axis=0)
-
+        df = df.reset_index(drop=True)
+        
         skf = StratifiedKFold(n_splits=5, shuffle = True, random_state = 2020)
         for fold, (train_index, val_index) in enumerate(skf.split(df.values, df['isup_grade'])):
             df.loc[val_index, 'fold'] = int(fold)

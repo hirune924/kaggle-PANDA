@@ -16,7 +16,7 @@ from pytorch_lightning import loggers
 
 
 
-from model import get_model_from_name
+from model import get_cls_model_from_name
 from systems_cls import PLRegressionImageClassificationSystem
 
 
@@ -63,7 +63,7 @@ def main(hparams):
         mode='min'
     )
 
-    model = get_model_from_name(model_name=hparams.model_name, num_classes=1, pretrained=True)
+    model = get_cls_model_from_name(model_name=hparams.model_name, num_classes=1, pretrained=True)
     pl_model = PLRegressionImageClassificationSystem(model, hparams)
 
 ###

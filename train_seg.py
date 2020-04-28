@@ -16,8 +16,8 @@ from pytorch_lightning import loggers
 
 
 
-from model import get_model_from_name
-from systems import PLImageSegmentationSystem
+from model import get_seg_model_from_name
+from systems_seg import PLImageSegmentationSystem
 
 
 def main(hparams):
@@ -44,7 +44,7 @@ def main(hparams):
     logger_list = [tb_logger, neptune_logger] if hparams.distributed_backend!='ddp' else tb_logger
 
     checkpoint_callback = ModelCheckpoint(
-        filepath=os.path.join(hparams.log_dir, '{epoch}-{avg_val_loss}-{val_qwk}'),
+        filepath=os.path.join(hparams.log_dir, '{epoch}-{avg_val_loss}-{}'),
         save_top_k=10,
         verbose=True,
         monitor='avg_val_loss',
@@ -63,7 +63,7 @@ def main(hparams):
         mode='min'
     )
 
-    model = get_model_from_name(model_name=hparams.model_name, num_classes=1, pretrained=True)
+    model = get_seg_model_from_name(model_name=hparams.model_name, in_channels=5, num_classes=2, pretrained=True)
     pl_model = PLImageSegmentationSystem(model, hparams)
 
 ###
@@ -121,6 +121,7 @@ if __name__ == '__main__':
                         type=int, required=False, default=5)
     parser.add_argument('-f', '--fold', help='target fold',
                         type=int, required=False, default=0)
+                        
     parser.add_argument('-alf', '--auto_lr_find', help='auto lr find.', 
                         action='store_true')
 
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     parser.add_argument('-if', '--image_format', help='image_format',
                         type=str, required=False, default='tiff')
     parser.add_argument('-mn', '--model_name', help='model_name',
-                        type=str, required=False, default='resnet18')
+                        type=str, required=False, default='resnet18_unet')
     parser.add_argument('-en', '--experiment_name', help='experiment_name',
                         type=str, required=False, default='default')
     parser.add_argument('-ld', '--log_dir', help='path to log',
