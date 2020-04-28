@@ -314,7 +314,7 @@ def main(hparams):
     # fit model !
     trainer.fit(pl_model)
 
-    neptune_logger.experiment.log_artifact(hparams.log_dir)
+    #neptune_logger.experiment.log_artifact(hparams.log_dir)
 
 
 if __name__ == '__main__':
