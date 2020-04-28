@@ -18,7 +18,7 @@ import albumentations as A
 
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import KFold
+from sklearn.model_selection import StratifiedKFold
 import pytorch_lightning as pl
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -158,7 +158,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
 # For Data
     def prepare_data(self):
         df = pd.read_csv(os.path.join(self.hparams.data_dir,'train.csv'))
-        skf = KFold(n_splits=5, shuffle = True, random_state = 2020)
+        skf = StratifiedKFold(n_splits=5, shuffle = True, random_state = 2020)
         for fold, (train_index, val_index) in enumerate(skf.split(df.values, df['isup_grade'])):
             df.loc[val_index, 'fold'] = int(fold)
         df['fold'] = df['fold'].astype(int)

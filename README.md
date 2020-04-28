@@ -6,11 +6,10 @@ python train.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50
 '''
 
 ## primary task
-* resized Dataの修正(終わり)
-* 5Fold実装（実行、logファイル名、サブミットについて）
-* segmentation→classification
+* 5Foldサブミット
 * そろそろファイル分ける
-* 画像サイズが大きい方が精度良さそう
+* segmentation→classification
+* 画像サイズが大きい方が精度良さそう（CVは確かに上がる）
 
 ## secondary task
 * 足したいモデル（efficientNet、DenseNet）
