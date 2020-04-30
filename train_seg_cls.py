@@ -12,12 +12,13 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import EarlyStopping
 from pytorch_lightning.logging.neptune import NeptuneLogger
 from pytorch_lightning import loggers
+import glob
 #from pytorch_lightning.logging import CometLogger
 
 
-
-from model import get_seg_model_from_name
-from systems_seg import PLImageSegmentationRegSystem
+from utils import load_pytorch_model
+from model import get_seg_model_from_name, get_cls_model_from_name
+from systems_seg_cls import PLImageSegmentationClassificationSystem
 
 
 def main(hparams):
@@ -44,7 +45,7 @@ def main(hparams):
     logger_list = [tb_logger, neptune_logger] if hparams.distributed_backend!='ddp' else tb_logger
 
     checkpoint_callback = ModelCheckpoint(
-        filepath=os.path.join(hparams.log_dir, '{epoch}-{avg_val_loss}'),
+        filepath=os.path.join(hparams.log_dir, '{epoch}-{avg_val_loss}-{val_qwk}'),
         save_top_k=10,
         verbose=True,
         monitor='avg_val_loss',
@@ -63,8 +64,11 @@ def main(hparams):
         mode='min'
     )
 
-    model = get_seg_model_from_name(model_name=hparams.model_name, in_channels=5, num_classes=2, pretrained=True)
-    pl_model = PLImageSegmentationRegSystem(model, hparams)
+    seg_model = get_seg_model_from_name(model_name=hparams.seg_model_name, in_channels=5, num_classes=2, pretrained=True)
+    seg_ckpt_pth = glob.glob(os.path.join(hparams.seg_ckpt_dir,'fold'+str(hparams.fold)+'*.ckpt'))
+    seg_model = load_pytorch_model(seg_ckpt_pth[0], seg_model)
+    cls_model = get_cls_model_from_name(model_name=hparams.cls_model_name, in_channels=3, num_classes=1, pretrained=True)
+    pl_model = PLImageSegmentationClassificationSystem(seg_model, cls_model, hparams)
 
 ###
     if hparams.auto_lr_find:
@@ -132,8 +136,12 @@ if __name__ == '__main__':
                         type=str, required=False, default='dp')
     parser.add_argument('-if', '--image_format', help='image_format',
                         type=str, required=False, default='tiff')
-    parser.add_argument('-mn', '--model_name', help='model_name',
+    parser.add_argument('-smn', '--seg_model_name', help='seg_model_name',
                         type=str, required=False, default='resnet18_unet')
+    parser.add_argument('-scd', '--seg_ckpt_dir', help='seg_ckpt_dir',
+                        type=str, required=False, default=None)
+    parser.add_argument('-cmn', '--cls_model_name', help='cls_model_name',
+                        type=str, required=False, default='resnet18')
     parser.add_argument('-en', '--experiment_name', help='experiment_name',
                         type=str, required=False, default='default')
     parser.add_argument('-ld', '--log_dir', help='path to log',

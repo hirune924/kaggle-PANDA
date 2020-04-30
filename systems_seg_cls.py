@@ -11,31 +11,45 @@ import albumentations as A
 import torch
 from torch.utils.data import DataLoader
 
-from dataset import PANDASegDataset
+from dataset import PANDASegClsDataset
 from loss import RMSELoss
 import torch.nn as nn
 import numpy as np
 
-class PLImageSegmentationRegSystem(pl.LightningModule):
+class PLImageSegmentationClassificationSystem(pl.LightningModule):
     
-    def __init__(self, model, hparams):
+    def __init__(self, seg_model, cls_model, hparams):
     #def __init__(self, train_loader, val_loader, model):
-        super(PLImageSegmentationRegSystem, self).__init__()
+        super(PLImageSegmentationClassificationSystem, self).__init__()
         #self.train_loader = train_loader
         #self.val_loader = val_loader
         self.hparams = hparams
-        self.model = model
-        self.criteria = nn.MSELoss(reduction='sum')
+        self.seg_model = seg_model
+        self.cls_model = cls_model
+        self.criteria = RMSELoss()
 
     def forward(self, x):
-        return self.model(x)
+        # x is [image, 2ch provider map]
+        # seg_out is [2ch mask(par provider)]
+        # cls_in is [image, 2ch provider map, 2ch seg_out] (summary 7ch)
+        # result is 1 scalar regression result
+        self.seg_model.eval()
+        seg_out = self.seg_model(x)
+        #cls_in = torch.cat([x, seg_out], dim=1)
+        seg_out[:,0,:,:] = seg_out[:,0,:,:] * (5.0/3.0)
+        seg_out = (seg_out[:,0,:,:] + seg_out[:,1,:,:]).unsqueeze(dim=1)
+        seg_out = seg_out/5.0
+        #print(x[:,0:3,:,:].shape, seg_out.shape)
+        cls_in = x[:,0:3,:,:] * torch.cat([seg_out,seg_out, seg_out], dim=1)
+        result = self.cls_model(cls_in.detach())
+        return result
     
 # For Training
     def training_step(self, batch, batch_nb):
         # REQUIRED
         x, y = batch
         y_hat = self.forward(x)
-        loss = self.criteria(y_hat, y)
+        loss = self.criteria(y_hat, y.view(-1, 1).float())
         loss = loss.unsqueeze(dim=-1)
         log = {'train_loss': loss}
         return {'loss': loss, 'log': log}
@@ -48,7 +62,7 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
 
     def configure_optimizers(self):
         # REQUIRED
-        optimizer = torch.optim.Adam(self.model.parameters(), lr=self.hparams.learning_rate)
+        optimizer = torch.optim.Adam([{'params':self.cls_model.parameters()}], lr=self.hparams.learning_rate)
         #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=2, verbose=True, eps=1e-6)
         return [optimizer], [{'scheduler': scheduler, 'monitor': 'avg_val_loss'}]
@@ -60,24 +74,34 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
         for param_group in optimizer.param_groups:
             lr = param_group["lr"]
         self.logger.log_metrics({"learning_rate": lr})
-    
+
 # For Validation
     def validation_step(self, batch, batch_nb):
         # OPTIONAL
         x, y = batch
         y_hat = self.forward(x)
-
-        val_loss = self.criteria(y_hat, y)
+        val_loss = self.criteria(y_hat, y.view(-1, 1).float())
         val_loss = val_loss.unsqueeze(dim=-1)
 
-        return {'val_loss': val_loss}
+        return {'val_loss': val_loss, 'y': y, 'y_hat': y_hat}
 
     def validation_epoch_end(self, outputs):
         # OPTIONAL
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
 
-        log = {'avg_val_loss': avg_loss}
+        
+        y = torch.cat([x['y'] for x in outputs]).cpu().detach().numpy().copy()
+        y_hat = torch.cat([x['y_hat'] for x in outputs]).cpu().detach().numpy().copy()
+
+        #preds = np.argmax(y_hat, axis=1)
+        preds = preds_rounder(y_hat)
+        val_acc = metrics.accuracy_score(y, preds)
+        val_qwk = metrics.cohen_kappa_score(y, preds, weights='quadratic')
+
+
+        log = {'avg_val_loss': avg_loss, 'val_acc': val_acc, 'val_qwk': val_qwk}
         return {'avg_val_loss': avg_loss, 'log': log}
+
 
 # For Data
     def prepare_data(self):
@@ -113,8 +137,8 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
 
-        self.train_dataset = PANDASegDataset(train_df, self.hparams.data_dir, self.hparams.image_format, transform=train_transform)
-        self.val_dataset = PANDASegDataset(val_df, self.hparams.data_dir, self.hparams.image_format, transform=valid_transform)
+        self.train_dataset = PANDASegClsDataset(train_df, self.hparams.data_dir, self.hparams.image_format, transform=train_transform)
+        self.val_dataset = PANDASegClsDataset(val_df, self.hparams.data_dir, self.hparams.image_format, transform=valid_transform)
         
     def train_dataloader(self):
         # REQUIRED
