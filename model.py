@@ -16,11 +16,17 @@ def get_cls_model_from_name(model_name=None, image_size=None, in_channels=3, num
         model.fc = nn.Linear(in_features, num_classes)
         if in_channels != 3:
             model.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
+
     elif model_name == 'se_resnet50':
         model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
         in_features = model.last_linear.in_features
         model.last_linear = nn.Linear(in_features, num_classes)
         model.avg_pool = torch.nn.AdaptiveAvgPool2d(1)
+        
+        if in_channels != 3:
+            removed = list(model.layer0.children())[1:]
+            seq = torch.nn.Sequential(*removed)
+            model.layer0 = torch.nn.Sequential(torch.nn.Conv2d(in_channels, 128, kernel_size=7, stride=2, padding=3, bias=False),seq)
     else:
         print('{} is not implimented'.format(model_name))
         model = None

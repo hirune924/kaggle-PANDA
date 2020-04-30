@@ -40,7 +40,7 @@ class PLImageSegmentationClassificationSystem(pl.LightningModule):
         seg_out = (seg_out[:,0,:,:] + seg_out[:,1,:,:]).unsqueeze(dim=1)
         seg_out = seg_out/5.0
         #print(x[:,0:3,:,:].shape, seg_out.shape)
-        cls_in = x[:,0:3,:,:] * torch.cat([seg_out,seg_out, seg_out], dim=1)
+        cls_in = x[:,0:3,:,:] + torch.cat([seg_out,seg_out, seg_out], dim=1)
         result = self.cls_model(cls_in.detach())
         return result
     
