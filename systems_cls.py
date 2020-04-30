@@ -16,6 +16,7 @@ from loss import RMSELoss
 import torch.nn as nn
 import numpy as np
 
+
 class PLRegressionImageClassificationSystem(pl.LightningModule):
     
     def __init__(self, model, hparams):
@@ -114,8 +115,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
 
-        self.train_dataset = PANDADataset(train_df, self.hparams.data_dir, self.hparams.image_format, transform=train_transform)
-        self.val_dataset = PANDADataset(val_df, self.hparams.data_dir, self.hparams.image_format, transform=valid_transform)
+        self.train_dataset = PANDADataset(train_df, self.hparams.data_dir, self.hparams.image_format, transform=train_transform, tile=self.hparams.tile)
+        self.val_dataset = PANDADataset(val_df, self.hparams.data_dir, self.hparams.image_format, transform=valid_transform, tile=self.hparams.tile)
         
     def train_dataloader(self):
         # REQUIRED

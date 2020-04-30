@@ -125,6 +125,8 @@ if __name__ == '__main__':
                         type=int, required=False, default=0)
     parser.add_argument('-alf', '--auto_lr_find', help='auto lr find.', 
                         action='store_true')
+    parser.add_argument('-tl', '--tile', help='tile', 
+                        action='store_true')
     parser.add_argument('-db', '--distributed_backend', help='distributed_backend',
                         type=str, required=False, default='dp')
     parser.add_argument('-if', '--image_format', help='image_format',

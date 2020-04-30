@@ -7,10 +7,12 @@ import skimage.io
 import os
 import cv2
 
+from utils import crop_tile
+
 class PANDADataset(Dataset):
     """PANDA Dataset."""
     
-    def __init__(self, dataframe, data_dir, image_format, transform=None):
+    def __init__(self, dataframe, data_dir, image_format, transform=None, tile=False):
         """
         Args:
             data_path (string): data path(glob_pattern) for dataset images
@@ -20,6 +22,7 @@ class PANDADataset(Dataset):
         self.transform = transform
         self.data_dir = data_dir
         self.image_format = image_format
+        self.tile = tile
         
     def __len__(self):
         return len(self.data)
@@ -36,6 +39,11 @@ class PANDADataset(Dataset):
             image = cv2.imread(img_name)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         
+        if self.tile:
+            try:
+                image = crop_tile(image)
+            except ZeroDivisionError:
+                print(img_name)
         if self.transform:
             image = self.transform(image=image)
             image = torch.from_numpy(image['image'].transpose(2, 0, 1))
