@@ -69,7 +69,7 @@ def main(hparams):
     seg_model = load_pytorch_model(seg_ckpt_pth[0], seg_model)
     if hparams.marge_type == 'cat':
         in_channels = 7     
-     elif hparams.marge_type == 'add':
+    elif hparams.marge_type == 'add':
         in_channels =  3
     cls_model = get_cls_model_from_name(model_name=hparams.cls_model_name, in_channels=in_channels, num_classes=1, pretrained=True)
     pl_model = PLImageSegmentationClassificationSystem(seg_model, cls_model, hparams)
