@@ -67,7 +67,11 @@ def main(hparams):
     seg_model = get_seg_model_from_name(model_name=hparams.seg_model_name, in_channels=5, num_classes=2, pretrained=True)
     seg_ckpt_pth = glob.glob(os.path.join(hparams.seg_ckpt_dir,'fold'+str(hparams.fold)+'*.ckpt'))
     seg_model = load_pytorch_model(seg_ckpt_pth[0], seg_model)
-    cls_model = get_cls_model_from_name(model_name=hparams.cls_model_name, in_channels=3, num_classes=1, pretrained=True)
+    if hparams.marge_type == 'cat':
+        in_channels = 7     
+     elif hparams.marge_type == 'add':
+        in_channels =  3
+    cls_model = get_cls_model_from_name(model_name=hparams.cls_model_name, in_channels=in_channels, num_classes=1, pretrained=True)
     pl_model = PLImageSegmentationClassificationSystem(seg_model, cls_model, hparams)
 
 ###
@@ -142,6 +146,8 @@ if __name__ == '__main__':
                         type=str, required=False, default=None)
     parser.add_argument('-cmn', '--cls_model_name', help='cls_model_name',
                         type=str, required=False, default='resnet18')
+    parser.add_argument('-mt', '--marge_type', help='marge_type',
+                        type=str, required=False, default='cat')
     parser.add_argument('-en', '--experiment_name', help='experiment_name',
                         type=str, required=False, default='default')
     parser.add_argument('-ld', '--log_dir', help='path to log',

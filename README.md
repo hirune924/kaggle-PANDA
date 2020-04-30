@@ -1,7 +1,7 @@
 # kaggle-PANDA
 
 ```
-python train_seg_cls.py -dd=../data -ld=../log/ -if=png -smn=resnet34_unet -scd=../ckpt -cmn=resnet18
+python train_seg_cls.py -dd=../data -ld=../log/ -if=png -smn=resnet34_unet -scd=../ckpt -cmn=se_resnet50 -mt=cat
 python train_seg.py -dd=../data -ld=../log/ -if=png -mn=resnet18_unet
 python train_cls.py -dd=../data -ld=../log/ -if=png -mn=resnet18 -en=localdebug
 python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50

@@ -35,12 +35,14 @@ class PLImageSegmentationClassificationSystem(pl.LightningModule):
         # result is 1 scalar regression result
         self.seg_model.eval()
         seg_out = self.seg_model(x)
-        #cls_in = torch.cat([x, seg_out], dim=1)
-        seg_out[:,0,:,:] = seg_out[:,0,:,:] * (5.0/3.0)
-        seg_out = (seg_out[:,0,:,:] + seg_out[:,1,:,:]).unsqueeze(dim=1)
-        seg_out = seg_out/5.0
-        #print(x[:,0:3,:,:].shape, seg_out.shape)
-        cls_in = x[:,0:3,:,:] + torch.cat([seg_out,seg_out, seg_out], dim=1)
+        if self.hparams.marge_type == 'cat':
+            cls_in = torch.cat([x, seg_out], dim=1)
+        elif self.hparams.marge_type == 'add':
+            seg_out[:,0,:,:] = seg_out[:,0,:,:] * (5.0/3.0)
+            seg_out = (seg_out[:,0,:,:] + seg_out[:,1,:,:]).unsqueeze(dim=1)
+            seg_out = seg_out/5.0
+            #print(x[:,0:3,:,:].shape, seg_out.shape)
+            cls_in = x[:,0:3,:,:] + torch.cat([seg_out,seg_out, seg_out], dim=1)
         result = self.cls_model(cls_in.detach())
         return result
     
