@@ -26,7 +26,7 @@ def get_cls_model_from_name(model_name=None, image_size=None, in_channels=3, num
         if in_channels != 3:
             removed = list(model.layer0.children())[1:]
             seq = torch.nn.Sequential(*removed)
-            model.layer0 = torch.nn.Sequential(torch.nn.Conv2d(in_channels, 128, kernel_size=7, stride=2, padding=3, bias=False),seq)
+            model.layer0 = torch.nn.Sequential(torch.nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False),seq)
     else:
         print('{} is not implimented'.format(model_name))
         model = None
