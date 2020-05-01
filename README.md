@@ -17,16 +17,18 @@ python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -
 * ckptにfold番号を入れる
 
 ## primary task
-* Gleason scoreを考慮してみる？
 * avgPoolで特徴マップを潰しているのが悪いのではないか説（avgPoolの変更からのhead変更を実装、なんかhead深すぎたのか良くない）
+    * 途中までheadだけ学習、その後全体学習
     * head薄くしてみる
-* そろそろDataAugmentationを考えてみるかモデルを変えてみる？？？
+* 画像の背景を黒色化？
 * ファイル分けたから次はフォルダ整理する、get_modelの引数を整備
 * まさか、もっと大きい画像使う？？？？？？
-* 画像の背景を黒色化？
-* クラス不均衡への対応？あんまり要らないかも
+
 
 ## secondary task
+* Gleason scoreを考慮してみる？
+* そろそろDataAugmentationを考えてみるかモデルを変えてみる？？？
+* クラス不均衡への対応？あんまり要らないかも
 * 足したいモデル（efficientNet、DenseNet）
 * 足したいDataAugmentation(今のところ特に無しkorniaは少し気になる)
 * optunaやりたい
