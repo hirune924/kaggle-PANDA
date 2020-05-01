@@ -16,13 +16,13 @@ from pytorch_lightning import loggers
 #from pytorch_lightning.logging import CometLogger
 
 
-from logger import MyNeptuneLogger
+#from logger import MyNeptuneLogger
 from model import get_cls_model_from_name
 from systems_cls import PLRegressionImageClassificationSystem
 from activation import Mish
 
 def main(hparams):
-    neptune_logger = MyNeptuneLogger(
+    neptune_logger = NeptuneLogger(
         api_key="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0=",
         project_name="hirune924/kaggle-PANDA",
         close_after_fit=False,
@@ -42,7 +42,7 @@ def main(hparams):
     )'''
     tb_logger = loggers.TensorBoardLogger(save_dir=hparams.log_dir, name='default', version=None)
  
-    logger_list = [tb_logger, neptune_logger]# if hparams.distributed_backend!='ddp' else tb_logger
+    logger_list = [tb_logger, neptune_logger] if hparams.distributed_backend!='ddp' else tb_logger
 
     checkpoint_callback = ModelCheckpoint(
         filepath=os.path.join(hparams.log_dir, '{epoch}-{avg_val_loss}-{val_qwk}'),
