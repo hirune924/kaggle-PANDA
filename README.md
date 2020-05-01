@@ -6,6 +6,7 @@ python train_seg.py -dd=../data -ld=../log/ -if=png -mn=resnet18_unet
 python train_cls.py -dd=../data -ld=../log/ -if=png -mn=resnet18 -en=localdebug
 python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50
 python train_cls.py -dd=../data -ld=../log/ -if=png -mn=resnet18 -tl
+python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -is=256
 ```
 
 ## 検証済み

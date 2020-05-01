@@ -7,6 +7,7 @@
 from argparse import ArgumentParser
 # for dataset and dataloader
 import os
+from torch import nn
 from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.callbacks import EarlyStopping
@@ -18,7 +19,7 @@ from pytorch_lightning import loggers
 
 from model import get_cls_model_from_name
 from systems_cls import PLRegressionImageClassificationSystem
-
+from activation import Mish
 
 def main(hparams):
     neptune_logger = NeptuneLogger(
@@ -63,7 +64,17 @@ def main(hparams):
         mode='min'
     )
 
-    model = get_cls_model_from_name(model_name=hparams.model_name, num_classes=1, pretrained=True)
+    if hparams.head == 'default':
+        head = None
+        avg_pool = 1
+    elif hparams.head == 'custom':
+        avg_pool = [8,8]
+        head = nn.Sequential(
+            nn.Flatten(start_dim=1, end_dim=-1),
+            nn.Linear(2048*8*8,512), Mish(),nn.BatchNorm1d(512),
+            nn.Dropout(0.5),nn.Linear(512,1))
+    model = get_cls_model_from_name(model_name=hparams.model_name, num_classes=1, pretrained=True, head=head, avg_pool=avg_pool)
+
     pl_model = PLRegressionImageClassificationSystem(model, hparams)
 
 ###
@@ -127,6 +138,8 @@ if __name__ == '__main__':
                         action='store_true')
     parser.add_argument('-tl', '--tile', help='tile', 
                         action='store_true')
+    parser.add_argument('-hd', '--head', help='head',
+                        type=str, required=False, default='default')
     parser.add_argument('-db', '--distributed_backend', help='distributed_backend',
                         type=str, required=False, default='dp')
     parser.add_argument('-if', '--image_format', help='image_format',
