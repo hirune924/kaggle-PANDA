@@ -14,11 +14,11 @@ python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -
 * 画像サイズが大きい方が精度良さそう（CVは確かに上がる、LBも512にして劇的改善したから768にしたらもっと上がった）
 * segmentation→classification(うまくいかない)
 * 入力画像の余白除去でもする？(タイル化にて対応、CVめっちゃいい)
+* ckptにfold番号を入れる
 
 ## primary task
 * avgPoolで特徴マップを潰しているのが悪いのではないか説（avgPoolの変更からのhead変更を実装）
 * ファイル分けたからフォルダ整理する、getモデルの引数を整備
-* ckptにfold番号を入れる
 
 ## secondary task
 * 足したいモデル（efficientNet、DenseNet）

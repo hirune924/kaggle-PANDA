@@ -45,7 +45,7 @@ def main(hparams):
     logger_list = [tb_logger, neptune_logger] if hparams.distributed_backend!='ddp' else tb_logger
 
     checkpoint_callback = ModelCheckpoint(
-        filepath=os.path.join(hparams.log_dir, '{epoch}-{avg_val_loss}-{val_qwk}'),
+        filepath=os.path.join(hparams.log_dir, 'fold'+str(hparams.fold)+'-'+'{epoch}-{avg_val_loss}-{val_qwk}'),
         save_top_k=10,
         verbose=True,
         monitor='avg_val_loss',
