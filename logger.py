@@ -8,6 +8,7 @@ try:
 except ImportError:  # pragma: no-cover
     raise ImportError('You want to use `neptune` logger which is not installed yet,'  # pragma: no-cover
                       ' install it with `pip install neptune-client`.')
+from pytorch_lightning.utilities import rank_zero_only
 
 class MyNeptuneLogger(NeptuneLogger):
 
