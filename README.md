@@ -23,7 +23,7 @@ python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -
 * 画像の背景を黒色化？
 * ファイル分けたから次はフォルダ整理する、get_modelの引数を整備
 * まさか、もっと大きい画像使う？？？？？？
-
+* ttaのアンサンブルを変える?
 
 ## secondary task
 * Gleason scoreを考慮してみる？
