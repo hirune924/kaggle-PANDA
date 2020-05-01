@@ -73,6 +73,16 @@ def main(hparams):
             nn.Flatten(start_dim=1, end_dim=-1),
             nn.Linear(2048*8*8,512), Mish(),nn.BatchNorm1d(512),
             nn.Dropout(0.5),nn.Linear(512,1))
+    elif hparams.head == 'thin-2':
+        avg_pool = [2,2]
+        head = nn.Sequential(
+            nn.Flatten(start_dim=1, end_dim=-1),
+            nn.Linear(2048*2*2,1))
+    elif hparams.head == 'thin-3':
+        avg_pool = [3,3]
+        head = nn.Sequential(
+            nn.Flatten(start_dim=1, end_dim=-1),
+            nn.Linear(2048*3*3,1))
     model = get_cls_model_from_name(model_name=hparams.model_name, num_classes=1, pretrained=True, head=head, avg_pool=avg_pool)
 
     pl_model = PLRegressionImageClassificationSystem(model, hparams)
