@@ -18,7 +18,7 @@ def get_cls_model_from_name(model_name=None, image_size=None, in_channels=3, num
             model.conv1 = nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
 
     elif model_name == 'se_resnet50':
-        model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained=None)#'imagenet')
+        model = pretrainedmodels.__dict__[model_name](num_classes=1000, pretrained='imagenet')
 
         # For num_classes
         in_features = model.last_linear.in_features
