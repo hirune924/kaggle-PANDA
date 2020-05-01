@@ -17,8 +17,14 @@ python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -
 * ckptにfold番号を入れる
 
 ## primary task
-* avgPoolで特徴マップを潰しているのが悪いのではないか説（avgPoolの変更からのhead変更を実装）
-* ファイル分けたからフォルダ整理する、getモデルの引数を整備
+* Gleason scoreを考慮してみる？
+* avgPoolで特徴マップを潰しているのが悪いのではないか説（avgPoolの変更からのhead変更を実装、なんかhead深すぎたのか良くない）
+    * head薄くしてみる
+* そろそろDataAugmentationを考えてみるかモデルを変えてみる？？？
+* ファイル分けたから次はフォルダ整理する、get_modelの引数を整備
+* まさか、もっと大きい画像使う？？？？？？
+* 画像の背景を黒色化？
+* クラス不均衡への対応？あんまり要らないかも
 
 ## secondary task
 * 足したいモデル（efficientNet、DenseNet）
