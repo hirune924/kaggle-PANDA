@@ -16,13 +16,13 @@ from pytorch_lightning import loggers
 #from pytorch_lightning.logging import CometLogger
 
 
-
+from logger import MyNeptuneLogger
 from model import get_cls_model_from_name
 from systems_cls import PLRegressionImageClassificationSystem
 from activation import Mish
 
 def main(hparams):
-    neptune_logger = NeptuneLogger(
+    neptune_logger = MyNeptuneLogger(
         api_key="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0=",
         project_name="hirune924/kaggle-PANDA",
         close_after_fit=False,
