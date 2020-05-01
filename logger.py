@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+from typing import Optional, List, Dict, Any, Union, Iterable
 from pytorch_lightning.logging.neptune import NeptuneLogger
 try:
     import neptune
