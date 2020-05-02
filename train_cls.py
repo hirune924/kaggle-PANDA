@@ -17,6 +17,7 @@ from pytorch_lightning import loggers
 
 
 #from logger import MyNeptuneLogger
+from callback import MyCallback
 from model import get_cls_model_from_name
 from systems_cls import PLRegressionImageClassificationSystem
 from activation import Mish
@@ -96,6 +97,7 @@ def main(hparams):
                     max_steps=None,min_steps=None,
                     checkpoint_callback=checkpoint_callback,
                     early_stop_callback=early_stop_callback,
+                    callbacks=[MyCallback()],
                     logger=logger_list,
                     accumulate_grad_batches=1,
                     precision=hparams.precision,
@@ -143,6 +145,8 @@ if __name__ == '__main__':
     parser.add_argument('-alf', '--auto_lr_find', help='auto lr find.', 
                         action='store_true')
     parser.add_argument('-tl', '--tile', help='tile', 
+                        action='store_true')
+    parser.add_argument('-hf', '--head_first', help='head_first', 
                         action='store_true')
     parser.add_argument('-hd', '--head', help='head',
                         type=str, required=False, default='default')

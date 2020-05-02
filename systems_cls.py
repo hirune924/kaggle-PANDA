@@ -50,6 +50,9 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
     def configure_optimizers(self):
         # REQUIRED
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.hparams.learning_rate)
+        if self.hparams.head_first:
+            optimizer = torch.optim.Adam(self.model.fc.parameters(), lr=self.hparams.learning_rate)
+
         #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=2, verbose=True, eps=1e-6)
         return [optimizer], [{'scheduler': scheduler, 'monitor': 'avg_val_loss'}]
@@ -58,9 +61,9 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
                     second_order_closure=None):
         optimizer.step()
         optimizer.zero_grad()
-        for param_group in optimizer.param_groups:
-            lr = param_group["lr"]
-        self.logger.log_metrics({"learning_rate": lr})
+        #for param_group in optimizer.param_groups:
+        #    lr = param_group["lr"]
+        #self.logger.log_metrics({"learning_rate": lr})
     
 # For Validation
     def validation_step(self, batch, batch_nb):
