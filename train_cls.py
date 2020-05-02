@@ -69,10 +69,9 @@ def main(hparams):
         head = None
         avg_pool = 1
     elif hparams.head == 'custom':
-        avg_pool = [8,8]
+        avg_pool = [2,2]
         head = nn.Sequential(
-            nn.Flatten(start_dim=1, end_dim=-1),
-            nn.Linear(2048*8*8,512), Mish(),nn.BatchNorm1d(512),
+            nn.Linear(2048*2*2,512), Mish(),nn.BatchNorm1d(512),
             nn.Dropout(0.5),nn.Linear(512,1))
     elif hparams.head == 'thin-2':
         avg_pool = [2,2]
@@ -142,12 +141,14 @@ if __name__ == '__main__':
                         type=int, required=False, default=5)
     parser.add_argument('-f', '--fold', help='target fold',
                         type=int, required=False, default=0)
+    parser.add_argument('-hf', '--head_first', help='head_first', 
+                        type=int, required=False, default=0)
+
     parser.add_argument('-alf', '--auto_lr_find', help='auto lr find.', 
                         action='store_true')
     parser.add_argument('-tl', '--tile', help='tile', 
                         action='store_true')
-    parser.add_argument('-hf', '--head_first', help='head_first', 
-                        action='store_true')
+
     parser.add_argument('-hd', '--head', help='head',
                         type=str, required=False, default='default')
     parser.add_argument('-db', '--distributed_backend', help='distributed_backend',
