@@ -157,6 +157,8 @@ if __name__ == '__main__':
                         type=str, required=False, default='tiff')
     parser.add_argument('-mn', '--model_name', help='model_name',
                         type=str, required=False, default='resnet18')
+    parser.add_argument('-ls', '--loss_name', help='loss_name',
+                        type=str, required=False, default='rmes')
     parser.add_argument('-en', '--experiment_name', help='experiment_name',
                         type=str, required=False, default='default')
     parser.add_argument('-ld', '--log_dir', help='path to log',

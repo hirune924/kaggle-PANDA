@@ -26,7 +26,10 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         #self.val_loader = val_loader
         self.hparams = hparams
         self.model = model
-        self.criteria = RMSELoss()
+        if self.hparams.loss_name == 'rmse':
+            self.criteria = RMSELoss()
+        elif self.hparams.loss_name == 'l1':
+            self.criteria = nn.SmoothL1Loss()
 
     def forward(self, x):
         return self.model(x)
