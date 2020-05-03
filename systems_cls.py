@@ -139,7 +139,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
     #    pass
 
 def preds_rounder(test_preds):
-    coef = [0.5, 1.5, 2.5, 3.5, 4.5, 5.5]
+    coef = [0.5, 1.5, 2.5, 3.5, 4.5]
 
     for i, pred in enumerate(test_preds):
         if pred < coef[0]:
@@ -152,10 +152,8 @@ def preds_rounder(test_preds):
             test_preds[i] = 3
         elif pred >= coef[3] and pred < coef[4]:
             test_preds[i] = 4
-        elif pred >= coef[4] and pred < coef[5]:
-            test_preds[i] = 5
         else:
-            test_preds[i] = 6
+            test_preds[i] = 5
     return test_preds
 
 
