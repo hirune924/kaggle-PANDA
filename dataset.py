@@ -93,12 +93,12 @@ class PANDASegDataset(Dataset):
             image = torch.from_numpy(image.transpose(2, 0, 1))
             mask = torch.from_numpy(mask).unsqueeze(dim=0).float()
         
-        if data_provider=='karolinska':
-            image = torch.cat([image, torch.ones_like(mask), torch.zeros_like(mask)], dim=0)
-            mask = torch.cat([mask, torch.zeros_like(mask)], dim=0)
-        elif data_provider=='radboud':
-            image = torch.cat([image, torch.zeros_like(mask), torch.ones_like(mask)], dim=0)
-            mask = torch.cat([torch.zeros_like(mask), mask], dim=0)
+        #if data_provider=='karolinska':
+        #    image = torch.cat([image, torch.ones_like(mask), torch.zeros_like(mask)], dim=0)
+        #    mask = torch.cat([mask, torch.zeros_like(mask)], dim=0)
+        #elif data_provider=='radboud':
+        #    image = torch.cat([image, torch.zeros_like(mask), torch.ones_like(mask)], dim=0)
+        #    mask = torch.cat([torch.zeros_like(mask), mask], dim=0)
         return image, mask
 
 

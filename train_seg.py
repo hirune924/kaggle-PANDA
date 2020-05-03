@@ -44,7 +44,7 @@ def main(hparams):
     logger_list = [tb_logger, neptune_logger] if hparams.distributed_backend!='ddp' else tb_logger
 
     checkpoint_callback = ModelCheckpoint(
-        filepath=os.path.join(hparams.log_dir, '{epoch}-{avg_val_loss}'),
+        filepath=os.path.join(hparams.log_dir, 'fold'+str(hparams.fold)+'-'+'{epoch}-{avg_val_loss}'),
         save_top_k=10,
         verbose=True,
         monitor='avg_val_loss',
@@ -63,7 +63,7 @@ def main(hparams):
         mode='min'
     )
 
-    model = get_seg_model_from_name(model_name=hparams.model_name, in_channels=5, num_classes=2, pretrained=True)
+    model = get_seg_model_from_name(model_name=hparams.model_name, in_channels=3, num_classes=1, pretrained=True)
     pl_model = PLImageSegmentationRegSystem(model, hparams)
 
 ###
