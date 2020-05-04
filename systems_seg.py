@@ -50,7 +50,7 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
         # REQUIRED
         optimizer = torch.optim.Adam(self.model.parameters(), lr=self.hparams.learning_rate)
         #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=2, verbose=True, eps=1e-6)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=10, verbose=True, eps=1e-6)
         return [optimizer], [{'scheduler': scheduler, 'monitor': 'avg_val_loss'}]
 
     def optimizer_step(self, current_epoch, batch_idx, optimizer, optimizer_idx,
