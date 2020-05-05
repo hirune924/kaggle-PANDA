@@ -63,7 +63,7 @@ def main(hparams):
         mode='min'
     )
 
-    model = get_seg_model_from_name(model_name=hparams.model_name, in_channels=3, num_classes=1, pretrained=True)
+    model = get_seg_model_from_name(model_name=hparams.model_name, in_channels=3, num_classes=6, pretrained=True)
     pl_model = PLImageSegmentationRegSystem(model, hparams)
 
 ###

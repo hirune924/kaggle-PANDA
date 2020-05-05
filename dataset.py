@@ -91,7 +91,7 @@ class PANDASegDataset(Dataset):
             image = trns['image']
             mask = trns['mask']
             image = torch.from_numpy(image.transpose(2, 0, 1))
-            mask = torch.from_numpy(mask).unsqueeze(dim=0).float()
+            mask = torch.from_numpy(mask).long()
         
         #if data_provider=='karolinska':
         #    image = torch.cat([image, torch.ones_like(mask), torch.zeros_like(mask)], dim=0)

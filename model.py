@@ -42,12 +42,12 @@ def get_cls_model_from_name(model_name=None, image_size=None, in_channels=3, num
 def get_seg_model_from_name(model_name=None, in_channels=None, image_size=None, num_classes=None, pretrained=True):
     
     if model_name == 'resnet18_unet':
-        model = smp.Unet(encoder_name='resnet18', in_channels=in_channels, classes=num_classes, activation=None, encoder_weights='imagenet')
+        model = smp.Unet(encoder_name='resnet18', in_channels=in_channels, classes=num_classes, activation='logsoftmax', encoder_weights='imagenet')
 
     elif model_name == 'resnet34_unet':
-        model = smp.Unet(encoder_name='resnet34', in_channels=in_channels, classes=num_classes, activation=None, encoder_weights='imagenet')
+        model = smp.Unet(encoder_name='resnet34', in_channels=in_channels, classes=num_classes, activation='logsoftmax', encoder_weights='imagenet')
     elif model_name == 'se_resnet50_unet':
-        model = smp.Unet(encoder_name='se_resnet50', in_channels=in_channels, classes=num_classes, activation=None, encoder_weights='imagenet')
+        model = smp.Unet(encoder_name='se_resnet50', in_channels=in_channels, classes=num_classes, activation='logsoftmax', encoder_weights='imagenet')
     else:
         print('{} is not implimented'.format(model_name))
         model = None

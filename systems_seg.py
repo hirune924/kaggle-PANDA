@@ -25,7 +25,8 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
         #self.val_loader = val_loader
         self.hparams = hparams
         self.model = model
-        self.criteria = nn.MSELoss(reduction='sum')
+        #self.criteria = nn.MSELoss(reduction='sum')
+        self.criteria = nn.NLLLoss()
 
     def forward(self, x):
         return self.model(x)
@@ -83,7 +84,7 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
     def prepare_data(self):
         # Read DataFrame
         df = pd.read_csv(os.path.join(self.hparams.data_dir,'train.csv'))
-        df = df[df['data_provider'] == 'karolinska' ].reset_index(drop=True)
+        df = df[df['data_provider'] == 'radboud' ].reset_index(drop=True)
         #Delete rows (mask dont exist)
         for idx in range(len(df)):
             image_id = df.loc[idx, 'image_id']
