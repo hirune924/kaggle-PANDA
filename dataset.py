@@ -87,12 +87,12 @@ class PANDASegDataset(Dataset):
         mask = mask[:,:,0]
         
         if self.transform:
+            print(torch.max(torch.from_numpy(mask)))
             trns = self.transform(image=image, mask=mask)
             image = trns['image']
             mask = trns['mask']
             image = torch.from_numpy(image.transpose(2, 0, 1))
             mask = torch.from_numpy(mask).long()
-        
         #if data_provider=='karolinska':
         #    image = torch.cat([image, torch.ones_like(mask), torch.zeros_like(mask)], dim=0)
         #    mask = torch.cat([mask, torch.zeros_like(mask)], dim=0)

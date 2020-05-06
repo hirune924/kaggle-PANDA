@@ -35,7 +35,7 @@ def main(args):
         save_path = os.path.join(args.save_dir, 'train_label_masks/' + mask_file.replace('.tiff', '.png'))
 
         mask = skimage.io.MultiImage(load_path)
-        img = cv2.resize(mask[-1], (args.size, args.size))
+        img = cv2.resize(mask[:,:,0], (args.size, args.size))
         cv2.imwrite(save_path, img)
         
         
