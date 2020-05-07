@@ -98,7 +98,7 @@ def main(hparams):
                     early_stop_callback=early_stop_callback,
                     callbacks=[MyCallback()],
                     logger=logger_list,
-                    accumulate_grad_batches=1,
+                    accumulate_grad_batches=hparams.accumulate_grad_batches,
                     precision=hparams.precision,
                     amp_level='O1',
                     auto_lr_find=False,
@@ -133,6 +133,8 @@ if __name__ == '__main__':
                         type=int, required=False, default=1)
     parser.add_argument('-bs', '--batch_size', help='batch_size',
                         type=int, required=False, default=32)
+    parser.add_argument('-agb', '--accumulate_grad_batches', help='accumulate_grad_batches',
+                        type=int, required=False, default=1)
     parser.add_argument('-is', '--image_size', help='image_size',
                         type=int, required=False, default=256)
     parser.add_argument('-il', '--image_layer', help='image_layer',
