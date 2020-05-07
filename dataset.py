@@ -12,7 +12,7 @@ from utils import crop_tile
 class PANDADataset(Dataset):
     """PANDA Dataset."""
     
-    def __init__(self, dataframe, data_dir, image_format, transform=None, tile=False):
+    def __init__(self, dataframe, data_dir, image_format, transform=None, tile=False, layer=-1):
         """
         Args:
             data_path (string): data path(glob_pattern) for dataset images
@@ -23,6 +23,7 @@ class PANDADataset(Dataset):
         self.data_dir = data_dir
         self.image_format = image_format
         self.tile = tile
+        self.layer = layer
         
     def __len__(self):
         return len(self.data)
@@ -34,7 +35,7 @@ class PANDADataset(Dataset):
         isup_grade = label = self.data.loc[idx, 'isup_grade']
         
         if self.image_format == 'tiff':
-            image = skimage.io.MultiImage(img_name)[-1]
+            image = skimage.io.MultiImage(img_name)[self.layer]
         elif self.image_format == 'png':
             image = cv2.imread(img_name)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -87,7 +88,7 @@ class PANDASegDataset(Dataset):
         mask = mask[:,:,0]
         
         if self.transform:
-            print(torch.max(torch.from_numpy(mask)))
+            #print(torch.max(torch.from_numpy(mask)))
             trns = self.transform(image=image, mask=mask)
             image = trns['image']
             mask = trns['mask']

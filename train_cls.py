@@ -135,6 +135,8 @@ if __name__ == '__main__':
                         type=int, required=False, default=32)
     parser.add_argument('-is', '--image_size', help='image_size',
                         type=int, required=False, default=256)
+    parser.add_argument('-il', '--image_layer', help='image_layer',
+                        type=int, required=False, default=-1)
     parser.add_argument('-lr', '--learning_rate', help='learning_rate',
                         type=float, required=False, default=1e-4)
     parser.add_argument('-nf', '--num_fold', help='fold num',
