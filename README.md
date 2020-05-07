@@ -29,6 +29,7 @@ python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -
     * segmentation→CNN(前にやったのはミスってた)
 * もっと大きい画像
     * 元が大きい画像とか使う意味ある？（タイル+元が大きい画像）
+    * 徐々に画像サイズを上げていくやつを実装する
 
 
 * avgPoolで特徴マップを潰しているのが悪いのではないか説（avgPoolの変更からのhead変更を実装、なんかhead深すぎたのか良くない）
