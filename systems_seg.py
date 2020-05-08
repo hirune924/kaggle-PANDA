@@ -101,7 +101,9 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
         val_df = df[df['fold']==self.hparams.fold]
         #train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
-        train_transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
+        train_transform = A.Compose([
+                     
+                     A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
                      A.Flip(always_apply=False, p=0.5),
                      A.RandomResizedCrop(height=self.hparams.image_size, width=self.hparams.image_size, scale=(0.8, 1.0), ratio=(0.75, 1.3333333333333333), interpolation=1, always_apply=False, p=1.0),
                      A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, always_apply=False, p=0.5),

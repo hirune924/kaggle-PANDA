@@ -10,9 +10,9 @@ from dataset import PANDADataset
 class MyCallback(pl.Callback):
     def on_epoch_start(self, trainer, pl_module):
         if pl_module.hparams.progressive:
-            ind = int(trainer.current_epoch / 1) if trainer.current_epoch < 5*7 else 7
+            ind = int(trainer.current_epoch / 3) if trainer.current_epoch < 3*7 else 7
             prog = [256, 512, 768, 1024, 1280, 1536, 1792, 2048]
-            batch = [32, 8, 32, 16, 8, 8, 4, 4]
+            batch = [32, 32, 32, 16, 8, 8, 4, 4]
             # For Progressive Resizing
             train_transform = A.Compose([
                         A.RandomResizedCrop(height=prog[ind], width=prog[ind], scale=(0.8, 1.0), ratio=(0.75, 1.3333333333333333), interpolation=1, always_apply=False, p=1.0),
