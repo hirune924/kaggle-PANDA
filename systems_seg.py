@@ -102,8 +102,8 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
         #train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
         train_transform = A.Compose([
-                     A.CropNonEmptyMaskIfExists(height=self.hparams.image_size*2, width=self.hparams.image_size*2, ignore_values=None, ignore_channels=None, always_apply=False, p=1.0),
-                     A.RandomResizedCrop(height=self.hparams.image_size, width=self.hparams.image_size, scale=(0.8, 1.0), ratio=(0.75, 1.3333333333333333), interpolation=1, always_apply=False, p=1.0),
+                     A.CropNonEmptyMaskIfExists(height=self.hparams.image_size, width=self.hparams.image_size, ignore_values=None, ignore_channels=None, always_apply=False, p=1.0),
+                     A.RandomResizedCrop(height=self.hparams.image_size, width=self.hparams.image_size, scale=(0.8, 1.2), ratio=(0.75, 1.3333333333333333), interpolation=1, always_apply=False, p=1.0),
                      A.Flip(always_apply=False, p=0.5),
                      A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, always_apply=False, p=0.5),
                      A.GaussNoise(var_limit=(10.0, 50.0), mean=0, always_apply=False, p=0.5),
