@@ -57,7 +57,7 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             optimizer = torch.optim.Adam(self.model.last_linear.parameters(), lr=self.hparams.learning_rate)
 
         #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.1)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=2, verbose=True, eps=1e-6)
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.5, patience=5, verbose=True, eps=1e-8)
         return [optimizer], [{'scheduler': scheduler, 'monitor': 'avg_val_loss'}]
 
     def optimizer_step(self, current_epoch, batch_idx, optimizer, optimizer_idx,
@@ -103,8 +103,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
             df.loc[val_index, 'fold'] = int(fold)
         df['fold'] = df['fold'].astype(int)
         #print(df)
-        train_df = df[df['fold']!=self.hparams.fold]
-        val_df = df[df['fold']==self.hparams.fold]
+        self.train_df = df[df['fold']!=self.hparams.fold]
+        self.val_df = df[df['fold']==self.hparams.fold]
         #train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
         train_transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
@@ -121,8 +121,8 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
 
-        self.train_dataset = PANDADataset(train_df, self.hparams.data_dir, self.hparams.image_format, transform=train_transform, tile=self.hparams.tile, layer=self.hparams.image_layer)
-        self.val_dataset = PANDADataset(val_df, self.hparams.data_dir, self.hparams.image_format, transform=valid_transform, tile=self.hparams.tile, layer=self.hparams.image_layer)
+        self.train_dataset = PANDADataset(self.train_df, self.hparams.data_dir, self.hparams.image_format, transform=train_transform, tile=self.hparams.tile, layer=self.hparams.image_layer)
+        self.val_dataset = PANDADataset(self.val_df, self.hparams.data_dir, self.hparams.image_format, transform=valid_transform, tile=self.hparams.tile, layer=self.hparams.image_layer)
         
     def train_dataloader(self):
         # REQUIRED

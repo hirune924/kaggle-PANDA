@@ -22,8 +22,8 @@ def load_pytorch_model(ckpt_name, model):
 def crop_tile(image_org):
     image = image_org
     img_y,img_x=image.shape[:2]
-    y_step=int(img_y/3) #高さ方向のグリッド間隔(単位はピクセル)
-    x_step=int(img_x/3) #幅方向のグリッド間隔(単位はピクセル)
+    y_step=244#int(img_y/3) #高さ方向のグリッド間隔(単位はピクセル)
+    x_step=244#int(img_x/3) #幅方向のグリッド間隔(単位はピクセル)
     #横線を引く：y_stepからimg_yの手前までy_stepおきに白い(BGRすべて255)横線を引く
     image[y_step:img_y:y_step, :, :] = 255
     #縦線を引く：x_stepからimg_xの手前までx_stepおきに白い(BGRすべて255)縦線を引く

@@ -21,15 +21,18 @@ python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -
 * 入力画像のタイル化は結構いい。でもタイルの作り方とかタイルのデメリットとかは考慮するべき
 * avg-poolを[2,2]とか[3,3]とかにすると少し精度は上がった気がするけど学習が少し不安定になる
 * 無闇にアンサンブル数を増やすと良くない。多くても10モデルか？？
+* そもそも高解像の画像をそのまま入力することが大事ということがわかった（できるだけresizeしない）
 
 
 ## primary task
 * segmentation→classification
-    * segmentation→lgbm（segmentationの精度がもっと欲しいところ）
+    * segmentation→lgbm（segmentationの精度がもっと欲しいところ、パッチで学習した方がいいかも）
     * segmentation→CNN(前にやったのはミスってた)
+
 * もっと大きい画像
     * 元が大きい画像とか使う意味ある？（タイル+元が大きい画像）
     * 徐々に画像サイズを上げていくやつを実装する
+    * tileの分割数をもう少し増やしてもいいのかも？もう少し余白を少なく
 
 
 * avgPoolで特徴マップを潰しているのが悪いのではないか説（avgPoolの変更からのhead変更を実装、なんかhead深すぎたのか良くない）

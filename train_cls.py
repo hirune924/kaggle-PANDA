@@ -152,6 +152,8 @@ if __name__ == '__main__':
                         action='store_true')
     parser.add_argument('-tl', '--tile', help='tile', 
                         action='store_true')
+    parser.add_argument('-pro', '--progressive', help='progressive', 
+                        action='store_true')
 
     parser.add_argument('-hd', '--head', help='head',
                         type=str, required=False, default='default')
