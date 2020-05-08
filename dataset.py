@@ -78,8 +78,8 @@ class PANDASegDataset(Dataset):
         isup_grade = label = self.data.loc[idx, 'isup_grade']
         
         if self.image_format == 'tiff':
-            image = skimage.io.MultiImage(img_name)[-1]
-            mask = skimage.io.MultiImage(mask_name)[-1]
+            image = skimage.io.MultiImage(img_name)[1]
+            mask = skimage.io.MultiImage(mask_name)[1]
         elif self.image_format == 'png':
             image = cv2.imread(img_name)
             mask = cv2.imread(mask_name)
