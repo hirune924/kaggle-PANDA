@@ -10,9 +10,9 @@ from dataset import PANDADataset
 class MyCallback(pl.Callback):
     def on_epoch_start(self, trainer, pl_module):
         if pl_module.hparams.progressive:
-            ind = int(trainer.current_epoch / 5) if trainer.current_epoch < 5*7 else 7
+            ind = int(trainer.current_epoch / 1) if trainer.current_epoch < 5*7 else 7
             prog = [256, 512, 768, 1024, 1280, 1536, 1792, 2048]
-            batch = [32, 32, 32, 16, 8, 8, 4, 4]
+            batch = [32, 8, 32, 16, 8, 8, 4, 4]
             # For Progressive Resizing
             train_transform = A.Compose([
                         A.RandomResizedCrop(height=prog[ind], width=prog[ind], scale=(0.8, 1.0), ratio=(0.75, 1.3333333333333333), interpolation=1, always_apply=False, p=1.0),
@@ -32,8 +32,15 @@ class MyCallback(pl.Callback):
             pl_module.val_dataset = PANDADataset(pl_module.val_df, pl_module.hparams.data_dir, pl_module.hparams.image_format, transform=valid_transform, tile=pl_module.hparams.tile, layer=pl_module.hparams.image_layer)
             trainer.train_dataloader = DataLoader(pl_module.train_dataset, batch_size=batch[ind],
                                                 shuffle=True, num_workers=4)
-            trainer.val_dataloaders = [DataLoader(pl_module.train_dataset, batch_size=batch[ind],
+            trainer.val_dataloaders = [DataLoader(pl_module.val_dataset, batch_size=batch[ind],
                                                 shuffle=True, num_workers=4)]
+
+            trainer.num_training_batches = len(trainer.train_dataloader)#float('inf')
+            trainer.num_val_batches = len(trainer.val_dataloaders[0])#float('inf')
+            trainer.val_check_batch = trainer.num_training_batches
+            #print(trainer.num_training_batches)
+            #print(trainer.num_val_batches)
+
     def on_epoch_end(self, trainer, pl_module):
         """Called when the epoch ends."""
         # For Head First

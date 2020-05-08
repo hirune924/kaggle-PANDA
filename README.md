@@ -30,9 +30,9 @@ python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -
     * segmentation→CNN(前にやったのはミスってた)
 
 * もっと大きい画像
-    * 元が大きい画像とか使う意味ある？（タイル+元が大きい画像）
-    * 徐々に画像サイズを上げていくやつを実装する
+    * 徐々に画像サイズを上げていくやつを実装する(後にrestartも検討する)
     * tileの分割数をもう少し増やしてもいいのかも？もう少し余白を少なく
+    * Apex対応
 
 
 * avgPoolで特徴マップを潰しているのが悪いのではないか説（avgPoolの変更からのhead変更を実装、なんかhead深すぎたのか良くない）
