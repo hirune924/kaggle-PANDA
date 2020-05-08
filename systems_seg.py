@@ -102,6 +102,7 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
         #train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
         train_transform = A.Compose([
+                     PadIfNeeded(min_height=self.hparams.image_size, min_width=self.hparams.image_size, border_mode=4, value=255, mask_value=0, always_apply=False, p=1.0),
                      A.CropNonEmptyMaskIfExists(height=self.hparams.image_size, width=self.hparams.image_size, ignore_values=None, ignore_channels=None, always_apply=False, p=1.0),
                      A.RandomResizedCrop(height=self.hparams.image_size, width=self.hparams.image_size, scale=(0.8, 1.2), ratio=(0.75, 1.3333333333333333), interpolation=1, always_apply=False, p=1.0),
                      A.Flip(always_apply=False, p=0.5),
@@ -112,7 +113,9 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
 
-        valid_transform = A.Compose([A.CropNonEmptyMaskIfExists(height=self.hparams.image_size, width=self.hparams.image_size, ignore_values=None, ignore_channels=None, always_apply=False, p=1.0),
+        valid_transform = A.Compose([
+                     PadIfNeeded(min_height=self.hparams.image_size, min_width=self.hparams.image_size, border_mode=4, value=255, mask_value=0, always_apply=False, p=1.0),
+                     A.CropNonEmptyMaskIfExists(height=self.hparams.image_size, width=self.hparams.image_size, ignore_values=None, ignore_channels=None, always_apply=False, p=1.0),
                      A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
                       ])
 
