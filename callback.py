@@ -23,8 +23,8 @@ class MyCallback2(pl.Callback):
                         A.GaussNoise(var_limit=(10.0, 50.0), mean=0, always_apply=False, p=0.5),
                         #A.Rotate(limit=90, interpolation=1, border_mode=4, value=None, mask_value=None, always_apply=False, p=0.5),
                         A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.0, rotate_limit=45, interpolation=1, border_mode=4, value=255, mask_value=None, always_apply=False, p=0.5),
-                        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
-                        A.Cutout(num_holes=8, max_h_size=8, max_w_size=8, fill_value=0, always_apply=False, p=0.5)
+                        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0),
+                        A.Cutout(num_holes=8, max_h_size=8, max_w_size=8, fill_value=0, always_apply=False, p=0.5),
                         ])
 
             valid_transform = A.Compose([A.Resize(height=prog[ind], width=prog[ind], interpolation=1, always_apply=False, p=1.0),
@@ -34,9 +34,9 @@ class MyCallback2(pl.Callback):
             pl_module.train_dataset = PANDADataset(pl_module.train_df, pl_module.hparams.data_dir, pl_module.hparams.image_format, transform=train_transform, tile=pl_module.hparams.tile, layer=pl_module.hparams.image_layer)
             pl_module.val_dataset = PANDADataset(pl_module.val_df, pl_module.hparams.data_dir, pl_module.hparams.image_format, transform=valid_transform, tile=pl_module.hparams.tile, layer=pl_module.hparams.image_layer)
             trainer.train_dataloader = DataLoader(pl_module.train_dataset, batch_size=batch[ind],
-                                                shuffle=True, num_workers=4)
+                                                shuffle=True, num_workers=4, drop_last=True)
             trainer.val_dataloaders = [DataLoader(pl_module.val_dataset, batch_size=batch[ind],
-                                                shuffle=True, num_workers=4)]
+                                                shuffle=True, num_workers=4, drop_last=True)]
 
             trainer.num_training_batches = len(trainer.train_dataloader)#float('inf')
             trainer.num_val_batches = len(trainer.val_dataloaders[0])#float('inf')
@@ -81,9 +81,9 @@ class MyCallback(pl.Callback):
             pl_module.train_dataset = PANDADataset(pl_module.train_df, pl_module.hparams.data_dir, pl_module.hparams.image_format, transform=train_transform, tile=pl_module.hparams.tile, layer=pl_module.hparams.image_layer)
             pl_module.val_dataset = PANDADataset(pl_module.val_df, pl_module.hparams.data_dir, pl_module.hparams.image_format, transform=valid_transform, tile=pl_module.hparams.tile, layer=pl_module.hparams.image_layer)
             trainer.train_dataloader = DataLoader(pl_module.train_dataset, batch_size=batch[ind],
-                                                shuffle=True, num_workers=4)
+                                                shuffle=True, num_workers=4, drop_last=True)
             trainer.val_dataloaders = [DataLoader(pl_module.val_dataset, batch_size=batch[ind],
-                                                shuffle=True, num_workers=4)]
+                                                shuffle=True, num_workers=4, drop_last=True)]
 
             trainer.num_training_batches = len(trainer.train_dataloader)#float('inf')
             trainer.num_val_batches = len(trainer.val_dataloaders[0])#float('inf')
