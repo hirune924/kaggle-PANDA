@@ -13,4 +13,9 @@ RUN apt-get update --fix-missing && apt-get install -y git libopencv-dev\
 RUN pip install pandas scikit-image albumentations opencv-python \
                 scikit-learn pytorch-lightning neptune-client imagecodecs tifffile \
                 pretrainedmodels catalyst[all] segmentation-models-pytorch
+
+RUN git clone https://github.com/NVIDIA/apex && \
+    cd apex && \
+    pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./ && \
+    cd .. && rm -rf apex\
                 

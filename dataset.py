@@ -12,7 +12,7 @@ from utils import crop_tile
 class PANDADataset(Dataset):
     """PANDA Dataset."""
     
-    def __init__(self, dataframe, data_dir, image_format, transform=None, tile=False, layer=-1):
+    def __init__(self, dataframe, data_dir, image_format, transform=None, tile=0, layer=-1):
         """
         Args:
             data_path (string): data path(glob_pattern) for dataset images
@@ -40,11 +40,19 @@ class PANDADataset(Dataset):
             image = cv2.imread(img_name)
             image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         
-        if self.tile:
+        if self.tile == 1:
             try:
                 image = crop_tile(image)
             except ZeroDivisionError:
                 print(img_name)
+        elif self.tile == 2:
+            image = tile(image, sz=512, N=16)
+            #image = np.random.shuffle(image))
+            image = cv2.hconcat([cv2.vconcat([image[0], image[1], image[2], image[3]]), 
+                             cv2.vconcat([image[4], image[5], image[6], image[7]]), 
+                             cv2.vconcat([image[8], image[9], image[10], image[11]]), 
+                             cv2.vconcat([image[12], image[13], image[14], image[15]])])
+
         if self.transform:
             image = self.transform(image=image)
             image = torch.from_numpy(image['image'].transpose(2, 0, 1))

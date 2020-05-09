@@ -147,10 +147,10 @@ if __name__ == '__main__':
                         type=int, required=False, default=0)
     parser.add_argument('-hf', '--head_first', help='head_first', 
                         type=int, required=False, default=0)
+    parser.add_argument('-tl', '--tile', help='tile', 
+                        type=int, required=False, default=0)
 
     parser.add_argument('-alf', '--auto_lr_find', help='auto lr find.', 
-                        action='store_true')
-    parser.add_argument('-tl', '--tile', help='tile', 
                         action='store_true')
     parser.add_argument('-pro', '--progressive', help='progressive', 
                         action='store_true')

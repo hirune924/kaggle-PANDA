@@ -22,6 +22,8 @@ python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -
 * avg-poolを[2,2]とか[3,3]とかにすると少し精度は上がった気がするけど学習が少し不安定になる
 * 無闇にアンサンブル数を増やすと良くない。多くても10モデルか？？
 * そもそも高解像の画像をそのまま入力することが大事ということがわかった（できるだけresizeしない）
+    * segmentation->clsだと推論時のGPUメモリとか時間とかがネックになる→seg時でもタイル化を使う？
+    * clsだと学習時の入力サイズがネックになる→思い切ってタイルを削るか？
 
 
 ## primary task
@@ -34,6 +36,8 @@ python train_cls.py -dd=../data -ld=../log/ -if=png -mn=se_resnet50 -hd=custom -
     * tileの分割数をもう少し増やしてもいいのかも？もう少し余白を少なく
     * Apex対応
 
+* DAの見直し
+    * アス比を変えるのも良くない可能性あり、ついにタイル化を採用する機運？
 
 * avgPoolで特徴マップを潰しているのが悪いのではないか説（avgPoolの変更からのhead変更を実装、なんかhead深すぎたのか良くない）
     * 途中までheadだけ学習、その後全体学習(head firstの実装が適当だからそこを整備してから実行)
