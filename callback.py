@@ -12,7 +12,8 @@ class MyCallback2(pl.Callback):
         if pl_module.hparams.progressive:
             ind = int(trainer.current_epoch / 5) if trainer.current_epoch < 5*3 else 3
             prog = [512, 1024, 1536, 2048]
-            batch = [32, 16, 8, 4]
+            #batch = [32, 16, 8, 4]
+            batch = [64, 32, 16, 8]
             # For Progressive Resizing
             train_transform = A.Compose([
                         A.RandomResizedCrop(height=prog[ind], width=prog[ind], scale=(0.8, 1.0), ratio=(1, 1), interpolation=1, always_apply=False, p=1.0),
