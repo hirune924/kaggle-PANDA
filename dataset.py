@@ -7,7 +7,7 @@ import skimage.io
 import os
 import cv2
 
-from utils import crop_tile
+from utils import crop_tile, tile
 
 class PANDADataset(Dataset):
     """PANDA Dataset."""
