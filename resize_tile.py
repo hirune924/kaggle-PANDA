@@ -26,7 +26,9 @@ def tile(img, sz=128, N=16):
 
 def load_img(img_name, layer):
     image = skimage.io.MultiImage(img_name)[layer]
-    
+    if image.shape[0]>50000 or image.shape[1]>50000:
+        image = None
+        image = skimage.io.MultiImage(img_name,conserve_memory = False, plugin='tifffile')[1]
     image = tile(image, sz=2048, N=16)
     #image = np.random.shuffle(image))
     image = cv2.hconcat([cv2.vconcat([image[0], image[1], image[2], image[3]]), 
