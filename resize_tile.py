@@ -56,6 +56,7 @@ def main(args):
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, img)
 
+    '''
     os.makedirs(os.path.join(args.save_dir, 'train_label_masks'), exist_ok=True)
     mask_files = os.listdir(os.path.join(args.data_dir, 'train_label_masks'))
     
@@ -68,7 +69,7 @@ def main(args):
         img = cv2.resize(mask_tile, (args.size, args.size))
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, img)
-        
+    ''' 
         
 if __name__ == '__main__':
     parser = ArgumentParser()
