@@ -26,7 +26,7 @@ def tile(img, sz=128, N=16):
 
 def load_img(img_name, layer):
     image = skimage.io.MultiImage(img_name)[layer]
-    if image.shape[0]>50000 or image.shape[1]>50000:
+    if image.shape[0]>40000 or image.shape[1]>40000:
         image = None
         image = skimage.io.MultiImage(img_name,conserve_memory = False, plugin='tifffile')[1]
     image = tile(image, sz=2048, N=16)
