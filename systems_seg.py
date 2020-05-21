@@ -132,9 +132,10 @@ class PLImageSegmentationRegSystem(pl.LightningModule):
         return DataLoader(self.val_dataset, batch_size=self.hparams.batch_size,
                           shuffle=False, num_workers=4)
 
-    #def test_dataloader(self):
+    # def test_dataloader(self):
     #    # OPTIONAL
     #    pass
+
 
 def preds_rounder(test_preds):
     coef = [0.5, 1.5, 2.5, 3.5, 4.5]
