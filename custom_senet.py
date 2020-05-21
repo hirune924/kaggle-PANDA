@@ -208,7 +208,7 @@ class SENet(nn.Module):
 
     def __init__(self, block, layers, groups, reduction, dropout_p=0.2,
                  inplanes=128, input_3x3=True, downsample_kernel_size=3,
-                 downsample_padding=1, num_classes=1000):
+                 downsample_padding=1, num_classes=1000, in_stride=2, in_dilation=1):
         """
         Parameters
         ----------
@@ -271,7 +271,7 @@ class SENet(nn.Module):
             ]
         else:
             layer0_modules = [
-                ('conv1', nn.Conv2d(3, inplanes, kernel_size=7, stride=2,
+                ('conv1', nn.Conv2d(3, inplanes, kernel_size=7, stride=in_stride, dilation=in_dilation,
                                     padding=3, bias=False)),
                 ('bn1', nn.BatchNorm2d(inplanes)),
                 ('relu1', nn.ReLU(inplace=True)),
@@ -387,11 +387,11 @@ def senet154(num_classes=1000, pretrained='imagenet'):
     return model
 
 
-def se_resnet50(num_classes=1000, pretrained='imagenet'):
+def se_resnet50(num_classes=1000, pretrained='imagenet', in_stride=2, in_dilation=1):
     model = SENet(SEResNetBottleneck, [3, 4, 6, 3], groups=1, reduction=16,
                   dropout_p=None, inplanes=64, input_3x3=False,
                   downsample_kernel_size=1, downsample_padding=0,
-                  num_classes=num_classes)
+                  num_classes=num_classes, in_stride=in_stride, in_dilation=in_dilation)
     if pretrained is not None:
         settings = pretrained_settings['se_resnet50'][pretrained]
         initialize_pretrained_model(model, num_classes, settings)

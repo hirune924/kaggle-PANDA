@@ -22,6 +22,9 @@ from model import get_cls_model_from_name
 from systems_cls import PLRegressionImageClassificationSystem
 from activation import Mish
 
+from utils import load_pytorch_model
+import glob
+
 def main(hparams):
     neptune_logger = NeptuneLogger(
         api_key="eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vdWkubmVwdHVuZS5haSIsImFwaV91cmwiOiJodHRwczovL3VpLm5lcHR1bmUuYWkiLCJhcGlfa2V5IjoiN2I2ZWM0NmQtNjg0NS00ZjM5LTkzNTItN2I4Nzc0YTUzMmM0In0=",
@@ -80,6 +83,8 @@ def main(hparams):
         avg_pool = [3,3]
         head = nn.Linear(2048*3*3,1)
     model = get_cls_model_from_name(model_name=hparams.model_name, num_classes=1, pretrained=True, head=head, avg_pool=avg_pool)
+    ckpt_pth = glob.glob(os.path.join(hparams.ckpt_dir,'fold'+str(hparams.fold)+'*.ckpt'))
+    model = load_pytorch_model(ckpt_pth[0], model)
 
     pl_model = PLRegressionImageClassificationSystem(model, hparams)
 
@@ -172,6 +177,8 @@ if __name__ == '__main__':
                         type=str, required=True)
     parser.add_argument('-dd', '--data_dir', help='path to data dir',
                         type=str, required=True)
+    parser.add_argument('-cd', '--ckpt_dir', help='ckpt_dir',
+                        type=str, required=False, default=None)
     
     #args = parser.parse_args(['-ld', '../working/', '-dd','../input/prostate-cancer-grade-assessment/'])
     args = parser.parse_args()
