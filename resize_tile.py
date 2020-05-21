@@ -9,6 +9,8 @@ from skimage.transform import resize, rescale
 from argparse import ArgumentParser
 import shutil
 
+import numpy as np
+
 def tile(img, sz=128, N=16):
     shape = img.shape
     pad0,pad1 = (sz - shape[0]%sz)%sz, (sz - shape[1]%sz)%sz
