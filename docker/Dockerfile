@@ -10,7 +10,7 @@ RUN apt-get update --fix-missing && apt-get install -y git libopencv-dev\
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
     
-RUN pip install pandas scikit-image albumentations opencv-python \
+RUN pip install pandas scikit-image albumentations opencv-python pillow-simd openslide-python\
                 scikit-learn pytorch-lightning neptune-client imagecodecs tifffile \
                 pretrainedmodels catalyst[all] segmentation-models-pytorch
 
