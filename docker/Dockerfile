@@ -2,7 +2,7 @@ FROM pytorch/pytorch:1.5-cuda10.1-cudnn7-devel
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-LABEL  maintainer "@hirune924"
+LABEL maintainer "@hirune924"
 
 RUN apt-get update --fix-missing && apt-get install -y git libopencv-dev\
     && \
