@@ -76,7 +76,7 @@ def generate_patches(slide_path, window_size=128, stride=128, k=20, auto_ws=Fals
     image = np.array(image)
     
     if auto_ws:
-        window_size = detect_best_window_size(image,K=K)
+        window_size = detect_best_window_size(image,K=16)
         stride = window_size
     
     max_width, max_height = image.shape[0], image.shape[1]
