@@ -35,7 +35,8 @@ def get_cls_model_from_name(model_name=None, image_size=None, in_channels=3, num
             model.layer0 = torch.nn.Sequential(torch.nn.Conv2d(in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False),seq)
 
     elif model_name == 'custom_se_resnet50':
-        model = se_resnet50(num_classes=1000, pretrained='imagenet', in_stride=4, in_dilation=1)
+        #model = se_resnet50(num_classes=1000, pretrained='imagenet', in_stride=4, in_dilation=1)
+        model = se_resnet50(num_classes=1000, pretrained=None, in_stride=4, in_dilation=1)
         # For num_classes
         in_features = model.last_linear.in_features
         model.last_linear = nn.Linear(in_features, num_classes)
