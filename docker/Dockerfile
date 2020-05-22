@@ -4,13 +4,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 LABEL maintainer "@hirune924"
 
-RUN apt-get update --fix-missing && apt-get install -y git libopencv-dev\
+RUN apt-get update --fix-missing && apt-get install -y git libopencv-dev python-openslide unzip \
     && \
     apt-get clean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
-    
-RUN pip install pandas scikit-image albumentations opencv-python pillow-simd openslide-python\
+
+RUN pip install pandas scikit-image albumentations opencv-python openslide-python\
                 scikit-learn pytorch-lightning neptune-client imagecodecs tifffile \
                 pretrainedmodels catalyst[all] segmentation-models-pytorch
 
