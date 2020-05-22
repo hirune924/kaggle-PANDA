@@ -107,20 +107,22 @@ class PLRegressionImageClassificationSystem(pl.LightningModule):
         self.val_df = df[df['fold']==self.hparams.fold]
         #train_df, val_df = train_test_split(train_df, stratify=train_df['isup_grade'])
 
-        train_transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
-                     A.Flip(always_apply=False, p=0.5),
-                     A.RandomResizedCrop(height=self.hparams.image_size, width=self.hparams.image_size, scale=(0.8, 1.0), ratio=(0.75, 1.3333333333333333), interpolation=1, always_apply=False, p=1.0),
-                     A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, always_apply=False, p=0.5),
-                     A.GaussNoise(var_limit=(10.0, 50.0), mean=0, always_apply=False, p=0.5),
-                     #A.Rotate(limit=90, interpolation=1, border_mode=4, value=None, mask_value=None, always_apply=False, p=0.5),
-                     A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.1, rotate_limit=45, interpolation=1, border_mode=4, value=None, mask_value=None, always_apply=False, p=0.5),
-                     A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
-                      ])
+        train_transform = A.Compose([
+                    A.RandomResizedCrop(height=self.hparams.image_size, width=self.hparams.image_size, scale=(0.8, 1.0), ratio=(1, 1), interpolation=1, always_apply=False, p=1.0),
+                    A.Flip(always_apply=False, p=0.5),
+                    A.RandomGridShuffle(grid=(4, 4), always_apply=False, p=1.0),
+                    A.HueSaturationValue(hue_shift_limit=10, sat_shift_limit=10, val_shift_limit=10, always_apply=False, p=0.5),
+                    A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, always_apply=False, p=0.5),
+                    A.GaussNoise(var_limit=(10.0, 50.0), mean=0, always_apply=False, p=0.5),
+                    #A.Rotate(limit=90, interpolation=1, border_mode=4, value=None, mask_value=None, always_apply=False, p=0.5),
+                    A.ShiftScaleRotate(shift_limit=0.0625, scale_limit=0.0, rotate_limit=45, interpolation=1, border_mode=4, value=255, mask_value=None, always_apply=False, p=0.5),
+                    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0),
+                    A.Cutout(num_holes=8, max_h_size=8, max_w_size=8, fill_value=0, always_apply=False, p=0.5),
+                    ])
 
         valid_transform = A.Compose([A.Resize(height=self.hparams.image_size, width=self.hparams.image_size, interpolation=1, always_apply=False, p=1.0),
-                     A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
-                      ])
-
+                    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), max_pixel_value=255.0, always_apply=False, p=1.0)
+                    ])
         self.train_dataset = PANDADataset(self.train_df, self.hparams.data_dir, self.hparams.image_format, transform=train_transform, tile=self.hparams.tile, layer=self.hparams.image_layer)
         self.val_dataset = PANDADataset(self.val_df, self.hparams.data_dir, self.hparams.image_format, transform=valid_transform, tile=self.hparams.tile, layer=self.hparams.image_layer)
         
