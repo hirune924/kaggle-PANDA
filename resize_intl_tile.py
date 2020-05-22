@@ -116,7 +116,7 @@ def glue_to_one_picture_from_coord(url, coordinates, window_size=200, k=16):
     scale = slide.level_downsamples[2]
     print(scale)
     
-    image = np.zeros((int(side*window_size*scale), int(side*window_size*scale), 3), dtype=np.int16)
+    image = np.zeros((int(side*window_size*scale), int(side*window_size*scale), 3), dtype=np.uint8)
     print(coordinates)
     for i, patch_coord in enumerate(coordinates):
         x = i // side
@@ -132,7 +132,7 @@ def glue_to_one_picture_from_coord(url, coordinates, window_size=200, k=16):
 
 def glue_to_one_picture(image_patches, window_size=200, k=16):
     side = int(np.sqrt(k))
-    image = np.zeros((side*window_size, side*window_size, 3), dtype=np.int16)
+    image = np.zeros((side*window_size, side*window_size, 3), dtype=np.uint8)
         
     for i, patch in image_patches.items():
         x = i // side
