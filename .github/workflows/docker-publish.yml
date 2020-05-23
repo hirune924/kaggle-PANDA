@@ -29,8 +29,8 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image
-        #run: docker build . --file docker/Dockerfile --tag $IMAGE_NAME
-        run: docker build -t hirune924/$IMAGE_NAME .
+        run: docker build . --file docker/Dockerfile --tag hirune924/$IMAGE_NAME
+        #run: docker build -t hirune924/$IMAGE_NAME .
 
       - name: Log into registry
         env:
