@@ -12,7 +12,7 @@ RUN apt-get update --fix-missing && apt-get install -y git libopencv-dev\
 
 RUN git clone https://github.com/NVIDIA/apex && \
     cd apex && \
-    pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./ && \
+    pip3 install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./ && \
     cd .. && rm -rf apex
 
 RUN pip install pandas scikit-image albumentations opencv-python \
