@@ -68,7 +68,7 @@ def detect_best_window_size(image,K=16):
     ratio_white_pixels, green_concentration, blue_concentration = compute_statistics(image)
     print(ratio_white_pixels, green_concentration, blue_concentration)
     h,w = image.shape[:2]
-    return int(np.sqrt(h*w*(1.0-ratio_white_pixels)*1.0/K))
+    return max(int(np.sqrt(h*w*(1.0-ratio_white_pixels)*1.0/K)),30)
 
 def generate_patches(slide_path, window_size=128, stride=128, k=20, auto_ws=False):
     
@@ -116,7 +116,8 @@ def glue_to_one_picture_from_coord(url, coordinates, window_size=200, k=16):
     scale = slide.level_downsamples[2]
     print(scale)
     
-    image = np.zeros((int(side*window_size*scale), int(side*window_size*scale), 3), dtype=np.uint8)
+    #image = np.zeros((int(side*window_size*scale), int(side*window_size*scale), 3), dtype=np.uint8)
+    image = np.full((int(side*window_size*scale), int(side*window_size*scale), 3), 255, dtype=np.uint8)
     print(coordinates)
     for i, patch_coord in enumerate(coordinates):
         x = i // side
@@ -168,6 +169,7 @@ def main(args):
     shutil.copyfile(os.path.join(args.data_dir, 'test.csv'),os.path.join(args.save_dir, 'test.csv'))
     
     for img_id in tqdm(train_labels.image_id):
+        print(img_id)
         load_path = os.path.join(args.data_dir, 'train_images/' + img_id + '.tiff')
         save_path = os.path.join(args.save_dir, 'train_images/' + img_id + '.png')
 
