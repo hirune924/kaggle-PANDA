@@ -1,23 +1,23 @@
 name: Docker-build-push
 
-env:
-  # TODO: Change variable to your image's name.: 
-  IMAGE_NAME: kaggle_panda
-  DOCKERHUB_ACCOUNT: hirune924
-  TAG_NAME: latest
-  DOCKER_FILE_PATH: docker/Dockerfile
-
 on:
   push:
     # Publish `master` as Docker `latest` image.
     branches:
       - master
+    # TODO: Change variable to your Docker file path for event trigger.:
     paths: 
-      - $DOCKER_FILE_PATH
+      - docker/Dockerfile
+
+env:
+  # TODO: Change variable to your image's name, dockerhub account tag docker file path.: 
+  IMAGE_NAME: kaggle_panda
+  DOCKERHUB_ACCOUNT: hirune924
+  TAG_NAME: latest
+  DOCKER_FILE_PATH: docker/Dockerfile
+
 
 jobs:
-  # Push image to GitHub Packages.
-  # See also https://docs.docker.com/docker-hub/builds/
   push:
 
     runs-on: ubuntu-latest
