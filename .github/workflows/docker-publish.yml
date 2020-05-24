@@ -16,7 +16,6 @@ env:
   TAG_NAME: latest
   DOCKER_FILE_PATH: docker/Dockerfile
 
-
 jobs:
   push:
 
