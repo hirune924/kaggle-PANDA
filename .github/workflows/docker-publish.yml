@@ -1,17 +1,19 @@
 name: Docker-build-push
 
+env:
+  # TODO: Change variable to your image's name.: 
+  IMAGE_NAME: kaggle_panda
+  DOCKERHUB_ACCOUNT: hirune924
+  TAG_NAME: latest
+  DOCKER_FILE_PATH: docker/Dockerfile
+
 on:
   push:
     # Publish `master` as Docker `latest` image.
     branches:
       - master
     paths: 
-      - docker/Dockerfile
-env:
-  # TODO: Change variable to your image's name.: 
-  IMAGE_NAME: kaggle_panda
-  DOCKERHUB_ACCOUNT: hirune924
-  TAG_NAME: latest
+      - $DOCKER_FILE_PATH
 
 jobs:
   # Push image to GitHub Packages.
@@ -25,7 +27,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image
-        run: docker build . --file docker/Dockerfile --tag $DOCKERHUB_ACCOUNT/$IMAGE_NAME
+        run: docker build . --file $DOCKER_FILE_PATH --tag $DOCKERHUB_ACCOUNT/$IMAGE_NAME
 
       - name: Log into registry
         env:
