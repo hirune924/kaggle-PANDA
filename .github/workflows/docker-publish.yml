@@ -1,21 +1,17 @@
-name: Docker
+name: Docker-build-push
 
 on:
   push:
     # Publish `master` as Docker `latest` image.
     branches:
       - master
-
-    # Publish `v1.2.3` tags as releases.
-    tags:
-      - latest
-
-  # Run tests for any PRs.
-  pull_request:
-
+    paths: 
+      - docker/Dockerfile
 env:
   # TODO: Change variable to your image's name.: 
   IMAGE_NAME: kaggle_panda
+  DOCKERHUB_ACCOUNT: hirune924
+  TAG_NAME: latest
 
 jobs:
   # Push image to GitHub Packages.
@@ -29,19 +25,13 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build image
-        run: docker build . --file docker/Dockerfile --tag hirune924/$IMAGE_NAME
-        #run: docker build -t hirune924/$IMAGE_NAME .
+        run: docker build . --file docker/Dockerfile --tag $DOCKERHUB_ACCOUNT/$IMAGE_NAME
 
       - name: Log into registry
         env:
           DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
         run: |
-          echo "${DOCKER_HUB_TOKEN}" | docker login -u hirune924 --password-stdin
+          echo "${DOCKER_HUB_TOKEN}" | docker login -u $DOCKERHUB_ACCOUNT --password-stdin
       - name: Push image
         run: |
-          #echo IMAGE_ID=$IMAGE_ID
-          #echo VERSION=$VERSION
-
-          #docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-          #docker push $IMAGE_ID:latest
-          docker push hirune924/$IMAGE_NAME:latest
+          docker push $DOCKERHUB_ACCOUNT/$IMAGE_NAME:$TAG_NAME
