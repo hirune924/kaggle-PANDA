@@ -101,7 +101,8 @@ def main(hparams):
     trainer = Trainer(gpus=hparams.gpus, max_epochs=hparams.max_epochs,min_epochs=hparams.min_epochs,
                     max_steps=None,min_steps=None,
                     checkpoint_callback=checkpoint_callback,
-                    early_stop_callback=early_stop_callback,
+                    #early_stop_callback=early_stop_callback,
+                    early_stop_callback=None,
                     callbacks=[my_callback],
                     logger=logger_list,
                     accumulate_grad_batches=hparams.accumulate_grad_batches,
@@ -114,7 +115,7 @@ def main(hparams):
                     num_nodes=1,
                     fast_dev_run=False,
                     gradient_clip_val=0.0,
-                    log_gpu_memory=None,
+                    log_gpu_memory=True,
                     log_save_interval=100,
                     num_sanity_val_steps=5,
                     overfit_pct=0.0)
