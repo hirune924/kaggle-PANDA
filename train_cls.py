@@ -115,7 +115,7 @@ def main(hparams):
                     num_nodes=1,
                     fast_dev_run=False,
                     gradient_clip_val=0.0,
-                    log_gpu_memory=True,
+                    log_gpu_memory=False,
                     log_save_interval=100,
                     num_sanity_val_steps=5,
                     overfit_pct=0.0)
