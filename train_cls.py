@@ -102,7 +102,7 @@ def main(hparams):
                     max_steps=None,min_steps=None,
                     checkpoint_callback=checkpoint_callback,
                     #early_stop_callback=early_stop_callback,
-                    early_stop_callback=None,
+                    early_stop_callback=False,
                     callbacks=[my_callback],
                     logger=logger_list,
                     accumulate_grad_batches=hparams.accumulate_grad_batches,
